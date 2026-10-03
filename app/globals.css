@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-on-background font-body antialiased;
+    font-size: 15px;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline;
+  }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+    font-size: 1.25rem;
+  }
+  ::selection {
+    @apply bg-primary text-on-primary;
+  }
+}
+
+@layer components {
+  .ghost-border {
+    border: 1px solid rgba(71, 71, 71, 0.15);
+  }
+
+  /* Liquid glass: tinted, saturated blur with a specular rim. Chromium also refracts the backdrop through
+     #lg-refract (components/LiquidGlassFilter.tsx). Tint strength is set with --lg-tint. */
+  .liquid-glass,
+  .nav-glass {
+    --lg-tint: rgba(17, 20, 23, 0.42);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.015) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.05)),
+      var(--lg-tint);
+    backdrop-filter: blur(16px) saturate(180%) brightness(1.06);
+    -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+      inset 1px 0 0 rgba(255, 255, 255, 0.07),
+      inset -1px 0 0 rgba(255, 255, 255, 0.07),
+      0 10px 40px -12px rgba(0, 0, 0, 0.55);
+  }
+  :root[data-lg-refract] .liquid-glass,
+  :root[data-lg-refract] .nav-glass {
+    backdrop-filter: url(#lg-refract) blur(16px) saturate(180%) brightness(1.06);
+  }
+  /* Panels holding long-form text (modals, drawers, menus) need more tint to stay readable. */
+  .liquid-glass-strong {
+    --lg-tint: rgba(13, 17, 23, 0.72);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .liquid-glass,
+    .nav-glass {
+      --lg-tint: rgba(17, 20, 23, 0.94);
+    }
+  }
+
+  .nav-active {
+    @apply text-primary bg-surface-container-highest border-l-2 border-primary;
+    font-weight: 700;
+  }
+
+  .data-chip {
+    @apply bg-surface-container-highest text-primary font-label uppercase px-2 py-1;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .status-critical {
+    @apply bg-error-container text-error font-label uppercase px-2 py-1;
+    font-size: 10px;
+  }
+
+  .status-active {
+    @apply bg-surface-container-highest text-primary font-label uppercase px-2 py-1;
+    font-size: 10px;
+  }
+
+  .metric-display {
+    @apply font-headline text-primary tracking-tight;
+  }
+
+  .bento-card {
+    @apply bg-surface-container-low p-8;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-on-primary font-label uppercase tracking-widest px-6 py-3 transition-colors duration-150;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    border: none;
+    cursor: pointer;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-primary:hover {
+    background: #A9ABAF;
+  }
+
+  .btn-ghost {
+    @apply text-primary font-label uppercase tracking-widest px-6 py-3 transition-colors duration-150;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(145, 145, 145, 0.20);
+    background: transparent;
+    cursor: pointer;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-ghost:hover {
+    background: #323538;
+  }
+
+  .badge-live {
+    @apply inline-flex items-center gap-2 px-3 py-1 bg-surface-container-highest text-primary font-label uppercase;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+}
+
+@layer utilities {
+  .tracking-ultra { letter-spacing: 0.25em; }
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #474747; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.skeleton {
+  background: #1D2023;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none !important; }
+}

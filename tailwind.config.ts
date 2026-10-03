@@ -1,0 +1,74 @@
+import type { Config } from "tailwindcss";
+import forms from "@tailwindcss/forms";
+import containerQueries from "@tailwindcss/container-queries";
+
+const config: Config = {
+  darkMode: 'class',
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'background': '#111417',
+        'surface': '#111417',
+        'surface-container-lowest': '#0B0F11',
+        'surface-container-low': '#191C1F',
+        'surface-container': '#1D2023',
+        'surface-container-high': '#272A2D',
+        'surface-container-highest': '#323538',
+        'surface-bright': '#37393D',
+        'on-background': '#E1E2E6',
+        'on-surface': '#E1E2E6',
+        'on-surface-variant': '#C6C6C6',
+        'primary': '#FFFFFF',
+        'on-primary': '#1A1C1C',
+        'primary-container': '#D4D4D4',
+        'primary-fixed': '#5D5F5F',
+        'primary-fixed-dim': '#454747',
+        'secondary': '#C5C6CA',
+        'secondary-fixed': '#C5C6CA',
+        'secondary-fixed-dim': '#A9ABAF',
+        'outline': '#919191',
+        'outline-variant': '#474747',
+        'error': '#FFB4AB',
+        'error-container': '#93000A',
+      },
+      borderRadius: {
+        DEFAULT: '0px',
+        'none': '0px',
+        'sm': '0px',
+        'md': '0px',
+        'lg': '0px',
+        'xl': '0px',
+        '2xl': '0px',
+        'full': '9999px',
+      },
+      fontFamily: {
+        headline: ['Space Grotesk', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+        label: ['Inter', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['clamp(56px, 8vw, 96px)', { lineHeight: '0.9', letterSpacing: '-0.03em', fontWeight: '700' }],
+        'display-md': ['clamp(40px, 6vw, 72px)', { lineHeight: '0.9', letterSpacing: '-0.03em', fontWeight: '700' }],
+        'display-sm': ['clamp(32px, 4vw, 48px)', { lineHeight: '1.0', letterSpacing: '-0.025em', fontWeight: '700' }],
+        'headline-lg': ['clamp(24px, 3vw, 36px)', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'headline-md': ['clamp(20px, 2.5vw, 28px)', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '600' }],
+        'body-lg': ['18px', { lineHeight: '1.6', letterSpacing: '0' }],
+        'body-md': ['15px', { lineHeight: '1.6', letterSpacing: '0' }],
+        'body-sm': ['13px', { lineHeight: '1.55', letterSpacing: '0' }],
+        'label-lg': ['12px', { lineHeight: '1', letterSpacing: '0.1em', fontWeight: '600' }],
+        'label-md': ['11px', { lineHeight: '1', letterSpacing: '0.08em', fontWeight: '600' }],
+        'label-sm': ['10px', { lineHeight: '1', letterSpacing: '0.08em', fontWeight: '700' }],
+      },
+    },
+  },
+  plugins: [
+    forms,
+    containerQueries,
+  ],
+};
+export default config;
