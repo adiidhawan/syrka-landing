@@ -65,7 +65,7 @@ function StageSlides({ id, eyebrow, slides, visual, backdrop, videoSrc }: {
         {backdrop}
         {videoSrc && <BackgroundVideo src={videoSrc} />}
         <div className="relative grid h-full grid-rows-[1fr_auto] gap-6 px-4 pb-10 pt-24 md:px-8 md:pb-14 lg:grid-cols-[1.05fr_1fr] lg:grid-rows-1 lg:gap-10 lg:pt-28">
-          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last">
+          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last lg:justify-center lg:gap-14">
             <div key={s.word} className="lx-swap">
               <div className="lx-mono flex flex-wrap items-center gap-3 text-[#8f84c9]">
                 <span className="h-px w-8 bg-gradient-to-r from-[#7a5cff] to-transparent" />
@@ -164,8 +164,9 @@ function Panel({ panel }: { panel: AudiencePanel }) {
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect()
-      el.style.setProperty('--mx', (((e.clientX - r.left) / r.width - 0.5) * 2).toFixed(3))
-      el.style.setProperty('--my', (((e.clientY - r.top) / r.height - 0.5) * 2).toFixed(3))
+      const clamp = (v: number) => Math.max(-1, Math.min(1, v)).toFixed(3)
+      el.style.setProperty('--mx', clamp(((e.clientX - r.left) / r.width - 0.5) * 2))
+      el.style.setProperty('--my', clamp(((e.clientY - r.top) / r.height - 0.5) * 2))
     }
     const onLeave = () => { el.style.setProperty('--mx', '0'); el.style.setProperty('--my', '0') }
     window.addEventListener('pointermove', onMove, { passive: true })
@@ -183,7 +184,7 @@ function Panel({ panel }: { panel: AudiencePanel }) {
               <div className="lx-chip lx-chip-b lx-mono">{panel.chips[1]}</div>
             </>
           )}
-    <div className="lx-swap relative w-full rounded-2xl border border-[#7a5cff]/25 bg-[#0d0b16]/85 p-5 shadow-[0_40px_90px_-30px_rgba(122,92,255,0.55)] backdrop-blur md:p-7">
+    <div className="lx-fade relative w-full rounded-2xl border border-[#7a5cff]/25 bg-[#0d0b16]/95 p-5 shadow-[0_40px_90px_-30px_rgba(122,92,255,0.55)] md:p-7">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-[17px] font-medium text-[var(--lx-ink)]">{panel.title}</div>

@@ -203,13 +203,13 @@
 .lx-float-stage { perspective: 1400px; --mx: 0; --my: 0; }
 .lx-float3d {
   transform-style: preserve-3d;
-  transform: rotateY(calc(var(--mx) * 9deg)) rotateX(calc(var(--my) * -7deg));
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: rotateY(calc(var(--mx) * 6deg)) rotateX(calc(var(--my) * -5deg));
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .lx-sway { position: relative; transform-style: preserve-3d; animation: lx-sway 10s ease-in-out infinite; }
 @keyframes lx-sway {
-  0%, 100% { transform: rotateX(5deg) rotateY(-9deg) translateY(0); }
-  50% { transform: rotateX(-3deg) rotateY(7deg) translateY(-14px); }
+  0%, 100% { transform: rotateX(3deg) rotateY(-5deg) translateY(0); }
+  50% { transform: rotateX(-2deg) rotateY(4deg) translateY(-10px); }
 }
 .lx-chip {
   position: absolute;
@@ -219,21 +219,23 @@
   border-radius: 14px;
   font-size: 11px !important;
   color: #ece8ff;
-  background: linear-gradient(135deg, rgba(122, 92, 255, 0.35), rgba(20, 16, 36, 0.85));
+  background: linear-gradient(135deg, rgba(74, 58, 150, 0.95), rgba(20, 16, 36, 0.97));
   border: 1px solid rgba(201, 188, 255, 0.3);
   box-shadow: 0 18px 40px -16px rgba(122, 92, 255, 0.8);
-  backdrop-filter: blur(10px);
 }
 .lx-chip-a { top: -22px; left: -34px; animation: lx-chip-a 6s ease-in-out infinite, lx-chip-in 0.7s 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
 .lx-chip-b { bottom: 54px; right: -40px; animation: lx-chip-b 7s ease-in-out infinite, lx-chip-in 0.7s 0.8s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
 @keyframes lx-chip-a { 0%, 100% { transform: translateZ(90px) translateY(0); } 50% { transform: translateZ(90px) translateY(-10px); } }
 @keyframes lx-chip-b { 0%, 100% { transform: translateZ(60px) translateY(0); } 50% { transform: translateZ(60px) translateY(9px); } }
 @keyframes lx-chip-in { from { opacity: 0; scale: 0.7; } to { opacity: 1; scale: 1; } }
+/* Opacity-only entrance for content inside 3D scenes: a filter there would flatten the scene while it runs. */
+.lx-fade { animation: lx-fade 0.5s ease-out both; }
+@keyframes lx-fade { from { opacity: 0; } to { opacity: 1; } }
 .lx-rise { animation: lx-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 @keyframes lx-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (max-width: 767px) { .lx-chip-a { left: -6px; } .lx-chip-b { right: -6px; } }
 @media (prefers-reduced-motion: reduce) {
-  .lx-sway, .lx-chip-a, .lx-chip-b, .lx-rise { animation: none; }
+  .lx-sway, .lx-chip-a, .lx-chip-b, .lx-rise, .lx-fade { animation: none; }
   .lx-float3d { transform: none; }
 }
 .lx-outline-dark { color: transparent; -webkit-text-stroke: 1.5px rgba(11, 11, 13, 0.55); }

@@ -67,7 +67,7 @@ export function CapabilityScroller({ id, intro, items, videoSrc, backdrop, visua
         )}
         <div className="relative grid h-full grid-rows-[1fr_auto] gap-6 px-4 pb-10 pt-24 md:px-8 md:pb-14 lg:grid-cols-[1.05fr_1fr] lg:grid-rows-1 lg:gap-10 lg:pt-28">
           {/* Left: the stage's name and reach at the top; the intro, or the active stage, anchored to the bottom */}
-          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last">
+          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last lg:justify-center lg:gap-14">
             {current ? (
               <div key={current.short} className="lx-swap">
                 <div className="lx-mono flex items-center gap-3 text-[#8f84c9]">

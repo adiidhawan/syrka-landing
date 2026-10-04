@@ -231,17 +231,14 @@ export default function LandingPage() {
             Both sections skip `isolate` so their text (z-[6]) can sit above the layer (z-[5]) while their backgrounds stay below it. */}
         <div className="relative">
           <div aria-hidden="true" className="pointer-events-none sticky top-0 z-[5] -mb-[100dvh] h-[100dvh]">
-            <MorphField fit={HERO_GLOBE} fitMobile={HERO_GLOBE_MOBILE} scrollerId="lx-capability" coordsId="lx-coords" />
+            <MorphField fit={HERO_GLOBE} fitMobile={HERO_GLOBE_MOBILE} scrollerId="lx-capability" />
           </div>
 
           {/* ── Hero ─────────────────────────────────────────────── */}
-          <section className="lx-dots relative flex min-h-[100dvh] flex-col justify-end overflow-hidden px-4 pb-10 pt-[50vh] md:px-8 md:pt-28">
+          <section className="lx-dots relative flex min-h-[100dvh] flex-col justify-end overflow-hidden px-4 pb-10 pt-[50vh] md:justify-center md:px-8 md:pt-28">
             {/* What the name stands for, set just under the globe and its Syrka symbol (see .lx-name). */}
             <div className="lx-mono lx-name pointer-events-none absolute z-[6] whitespace-nowrap text-[#3a42c4]">
               Systematic · Relational · Knowledge · Architecture
-            </div>
-            <div className="lx-mono pointer-events-none absolute left-4 top-24 z-[6] md:left-8">
-              <div id="lx-coords" className="text-[#bdbdc2]">22°00&apos;N, 20°00&apos;E</div>
             </div>
 
             <div className="pointer-events-none relative z-[6] max-w-3xl">
@@ -260,9 +257,8 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="lx-mono pointer-events-none relative z-[6] mt-16 flex justify-between gap-4 text-[var(--lx-dim)]">
+            <div className="lx-mono pointer-events-none relative z-[6] mt-16 text-[var(--lx-dim)]">
               <span>/ Institutional capability infrastructure</span>
-              <span className="lx-cursor shrink-0">Scroll to explore</span>
             </div>
           </section>
 
@@ -396,8 +392,10 @@ export default function LandingPage() {
         </section>
 
         {/* ── Closing ──────────────────────────────────────────── */}
-        <section id="closing" className="relative isolate scroll-mt-20 overflow-hidden bg-[var(--lx-bg)] px-4 pb-20 pt-28 md:px-8 md:pt-40">
-          <Backdrop seed={11} />
+        {/* Closing and footer sit on one shared backdrop so the contour lines run straight through. */}
+        <div className="relative isolate overflow-hidden bg-[var(--lx-bg)]">
+        <Backdrop seed={11} />
+        <section id="closing" className="relative scroll-mt-20 px-4 pb-20 pt-28 md:px-8 md:pt-40">
           {VIDEOS.closing && (
             <>
               <PixelVideo src={VIDEOS.closing} className="opacity-25" />
@@ -422,8 +420,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Footer ───────────────────────────────────────────── */}
-        <footer className="relative isolate bg-[var(--lx-bg)] px-4 pb-6 pt-10 md:px-8">
-          <Backdrop seed={13} />
+        <footer className="relative px-4 pb-6 pt-10 md:px-8">
           <div className="relative">
             <AsciiWordmark text="SYRKA" />
             <div className="mt-12 grid gap-10 border-t border-[var(--lx-line)] pt-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -455,6 +452,7 @@ export default function LandingPage() {
             </div>
           </div>
         </footer>
+        </div>
       </main>
     </div>
   )
