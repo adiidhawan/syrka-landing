@@ -64,22 +64,22 @@ function StageSlides({ id, eyebrow, slides, visual, backdrop, videoSrc }: {
       <div className="sticky top-0 h-[100dvh] overflow-hidden">
         {backdrop}
         {videoSrc && <BackgroundVideo src={videoSrc} />}
-        <div className="relative grid h-full grid-rows-[1fr_auto] gap-6 px-4 pb-10 pt-24 md:px-8 md:pb-14 lg:grid-cols-[1.05fr_1fr] lg:grid-rows-1 lg:gap-10 lg:pt-28">
-          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last lg:justify-center lg:gap-14">
+        <div className="relative grid h-full grid-rows-[1fr_auto] gap-4 px-5 pb-8 pt-20 md:gap-6 md:px-8 md:pb-14 md:pt-24 lg:grid-cols-[1.05fr_1fr] lg:grid-rows-1 lg:gap-10 lg:pt-28">
+          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last max-lg:gap-4 max-lg:text-center lg:justify-center lg:gap-14">
             <div key={s.word} className="lx-swap">
-              <div className="lx-mono flex flex-wrap items-center gap-3 text-[#8f84c9]">
-                <span className="h-px w-8 bg-gradient-to-r from-[#7a5cff] to-transparent" />
-                {eyebrow}
-                <span className="text-[#5f54a8]">/</span>
+              <div className="lx-mono flex flex-wrap items-center gap-3 text-[#8f84c9] max-lg:justify-center max-md:!text-[10px]">
+                <span className="h-px w-8 bg-gradient-to-r from-[#7a5cff] to-transparent max-lg:hidden" />
+                <span className="max-md:hidden">{eyebrow}</span>
+                <span className="text-[#5f54a8] max-md:hidden">/</span>
                 <span className="text-[#c9bcff]">{s.top}</span>
               </div>
-              <span className="lx-giant mt-4 block bg-gradient-to-br from-[#f1eeff] via-[#c9bcff] to-[#7a5cff] bg-clip-text pb-2 text-[clamp(40px,5vw,96px)] text-transparent">
+              <span className="lx-giant mt-4 block bg-gradient-to-br from-[#f1eeff] via-[#c9bcff] to-[#7a5cff] bg-clip-text pb-2 text-[clamp(34px,5vw,96px)] text-transparent max-lg:mt-2">
                 {s.word}
               </span>
             </div>
 
             <div>
-              <div className="mb-8 flex items-center gap-4 max-lg:mb-5" aria-hidden="true">
+              <div className="mb-8 flex items-center gap-4 max-lg:mb-4 max-lg:justify-center" aria-hidden="true">
                 <div className="flex gap-1.5">
                   {slides.map((it, i) => (
                     <span
@@ -94,23 +94,46 @@ function StageSlides({ id, eyebrow, slides, visual, backdrop, videoSrc }: {
               </div>
 
               <div key={s.word} className="lx-swap" aria-live="polite">
-                <div className="lx-mono flex flex-wrap items-center gap-x-3 gap-y-1 !text-[12px] text-[#a99bff]">
+                <div className="lx-mono flex flex-wrap items-center gap-x-3 gap-y-1 !text-[12px] text-[#a99bff] max-lg:justify-center max-md:!text-[10.5px]">
                   <span>{s.label[0]}</span>
                   <span className="text-[#5f54a8]">/</span>
                   <span className="text-[#8f84c9]">{s.label[1]}</span>
                 </div>
-                <p className="lx-serif mt-5 text-[clamp(26px,2.6vw,40px)] leading-tight text-[#9d8cff]">{s.subtitle}</p>
-                <p className="mt-4 max-w-xl text-[clamp(17px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)]">{s.body}</p>
-                <h3 className="mt-8 font-headline text-[clamp(44px,5.8vw,104px)] font-medium leading-[0.92] tracking-[-0.04em] text-[var(--lx-ink)] max-lg:mt-5">
+                <p className="lx-serif mt-5 text-[clamp(22px,2.6vw,40px)] leading-tight text-[#9d8cff] max-lg:mt-3">{s.subtitle}</p>
+                <p className="mt-4 max-w-xl text-[clamp(15px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)] max-lg:mx-auto max-lg:mt-2 max-lg:leading-normal">{s.body}</p>
+                <h3 className="mt-8 font-headline text-[clamp(34px,5.8vw,104px)] font-medium leading-[0.92] tracking-[-0.04em] text-[var(--lx-ink)] max-lg:mt-4">
                   {s.heading}
                 </h3>
               </div>
             </div>
           </div>
 
-          <div className="relative min-h-[260px]">{visual(active)}</div>
+          <div className="relative min-h-[200px]">{visual(active)}</div>
         </div>
       </div>
+    </div>
+  )
+}
+
+/** Scales its child down (never up) so it fits the box it is centred in; used where phones leave little room. */
+function FitBox({ children }: { children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null)
+  const inner = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const b = box.current, el = inner.current
+    if (!b || !el) return
+    const fit = () => {
+      const s = Math.min(1, b.clientHeight / Math.max(1, el.offsetHeight), b.clientWidth / Math.max(1, el.offsetWidth))
+      el.style.transform = s < 1 ? `scale(${s.toFixed(3)})` : ''
+    }
+    const ro = new ResizeObserver(fit)
+    ro.observe(b); ro.observe(el)
+    fit()
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div ref={box} className="flex h-full w-full items-center justify-center max-md:py-2">
+      <div ref={inner} className="w-full max-w-[560px] shrink-0 origin-center">{children}</div>
     </div>
   )
 }
@@ -184,7 +207,7 @@ function Panel({ panel }: { panel: AudiencePanel }) {
               <div className="lx-chip lx-chip-b lx-mono">{panel.chips[1]}</div>
             </>
           )}
-    <div className="lx-fade relative w-full rounded-2xl border border-[#7a5cff]/25 bg-[#0d0b16]/95 p-5 shadow-[0_40px_90px_-30px_rgba(122,92,255,0.55)] md:p-7">
+    <div className="lx-fade relative w-full rounded-2xl border border-[#7a5cff]/25 bg-[#0d0b16]/95 p-4 sm:p-5 shadow-[0_40px_90px_-30px_rgba(122,92,255,0.55)] md:p-7">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-[17px] font-medium text-[var(--lx-ink)]">{panel.title}</div>
@@ -211,7 +234,7 @@ function Panel({ panel }: { panel: AudiencePanel }) {
 
       <ul className="mt-4 space-y-3">
         {panel.rows.map((r, i) => (
-          <li key={r.label} className="lx-rise" style={{ animationDelay: `${180 + i * 90}ms` }}>
+          <li key={r.label} className={`lx-rise ${i >= 3 ? 'max-md:hidden' : ''}`} style={{ animationDelay: `${180 + i * 90}ms` }}>
             {panel.kind === 'match' ? (
               <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-3 py-2.5">
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#7a5cff] to-[#2b2bff] text-[12px] font-medium text-white">{r.label.slice(-1)}</span>
@@ -246,7 +269,7 @@ function Panel({ panel }: { panel: AudiencePanel }) {
         ))}
       </ul>
 
-      <div className="lx-mono mt-5 border-t border-white/[0.06] pt-4 !text-[10.5px] text-[#8f84c9]">{panel.footer}</div>
+      <div className="lx-mono mt-5 border-t border-white/[0.06] pt-4 !text-[10.5px] text-[#8f84c9] max-md:hidden">{panel.footer}</div>
     </div>
         </div>
       </div>
@@ -269,8 +292,8 @@ export function AudienceSlides({ id, slides, panels, backdrop, videoSrc }: {
       backdrop={backdrop}
       videoSrc={videoSrc}
       visual={active => (
-        <div className="flex h-full items-center justify-center">
-          <Panel key={active} panel={panels[active]} />
+        <div className="absolute inset-0">
+          <FitBox><Panel key={active} panel={panels[active]} /></FitBox>
         </div>
       )}
     />

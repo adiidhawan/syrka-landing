@@ -65,16 +65,16 @@ export function CapabilityScroller({ id, intro, items, videoSrc, backdrop, visua
             <div aria-hidden="true" className="absolute inset-0" style={{ background: 'linear-gradient(90deg, var(--lx-bg), color-mix(in srgb, var(--lx-bg) 60%, transparent), color-mix(in srgb, var(--lx-bg) 30%, transparent))' }} />
           </>
         )}
-        <div className="relative grid h-full grid-rows-[1fr_auto] gap-6 px-4 pb-10 pt-24 md:px-8 md:pb-14 lg:grid-cols-[1.05fr_1fr] lg:grid-rows-1 lg:gap-10 lg:pt-28">
+        <div className="relative grid h-full grid-rows-[1fr_auto] gap-4 px-5 pb-8 pt-20 md:gap-6 md:px-8 md:pb-14 md:pt-24 lg:grid-cols-[1.05fr_1fr] lg:grid-rows-1 lg:gap-10 lg:pt-28">
           {/* Left: the stage's name and reach at the top; the intro, or the active stage, anchored to the bottom */}
-          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last lg:justify-center lg:gap-14">
+          <div className="flex min-h-0 flex-col justify-between gap-8 max-lg:order-last max-lg:gap-4 max-lg:text-center lg:justify-center lg:gap-14">
             {current ? (
               <div key={current.short} className="lx-swap">
-                <div className="lx-mono flex items-center gap-3 text-[#8f84c9]">
-                  <span className="h-px w-8 bg-gradient-to-r from-[#7a5cff] to-transparent" />
+                <div className="lx-mono flex items-center gap-3 text-[#8f84c9] max-lg:justify-center">
+                  <span className="h-px w-8 bg-gradient-to-r from-[#7a5cff] to-transparent max-lg:hidden" />
                   Reach <span className="text-[#c9bcff]">→ {current.reach.toLowerCase()}</span>
                 </div>
-                <span className="lx-giant mt-4 block bg-gradient-to-br from-[#f1eeff] via-[#c9bcff] to-[#7a5cff] bg-clip-text pb-2 text-[clamp(40px,5vw,96px)] text-transparent">
+                <span className="lx-giant mt-4 block bg-gradient-to-br from-[#f1eeff] via-[#c9bcff] to-[#7a5cff] bg-clip-text pb-2 text-[clamp(34px,5vw,96px)] text-transparent max-lg:mt-2">
                   {current.short}
                 </span>
               </div>
@@ -84,7 +84,7 @@ export function CapabilityScroller({ id, intro, items, videoSrc, backdrop, visua
               <div key="intro" className="lx-swap">{intro}</div>
             ) : (
               <div>
-                <div className="mb-8 flex items-center gap-4 max-lg:mb-5" aria-hidden="true">
+                <div className="mb-8 flex items-center gap-4 max-lg:mb-4 max-lg:justify-center" aria-hidden="true">
                   <div className="flex gap-1.5">
                     {items.map((it, i) => (
                       <span
@@ -99,14 +99,14 @@ export function CapabilityScroller({ id, intro, items, videoSrc, backdrop, visua
                 </div>
 
                 <div key={current.short} className="lx-swap" aria-live="polite">
-                  <div className="lx-mono flex flex-wrap items-center gap-x-3 gap-y-1 !text-[12px] text-[#a99bff]">
+                  <div className="lx-mono flex flex-wrap items-center gap-x-3 gap-y-1 !text-[12px] text-[#a99bff] max-lg:justify-center max-md:!text-[10.5px]">
                     <span>{current.product}</span>
                     <span className="text-[#5f54a8]">/</span>
                     <span className="text-[#8f84c9]">For {current.audience.toLowerCase()}</span>
                   </div>
-                  <p className="lx-serif mt-5 text-[clamp(26px,2.6vw,40px)] leading-tight text-[#9d8cff]">{current.subtitle}</p>
-                  <p className="mt-4 max-w-xl text-[clamp(17px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)]">{current.description}</p>
-                  <h3 className="mt-8 font-headline text-[clamp(44px,5.8vw,104px)] font-medium leading-[0.92] tracking-[-0.04em] text-[var(--lx-ink)] max-lg:mt-5">
+                  <p className="lx-serif mt-5 text-[clamp(22px,2.6vw,40px)] leading-tight text-[#9d8cff] max-lg:mt-3">{current.subtitle}</p>
+                  <p className="mt-4 max-w-xl text-[clamp(15px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)] max-lg:mx-auto max-lg:mt-2 max-lg:leading-normal">{current.description}</p>
+                  <h3 className="mt-8 font-headline text-[clamp(34px,5.8vw,104px)] font-medium leading-[0.92] tracking-[-0.04em] text-[var(--lx-ink)] max-lg:mt-4">
                     {current.line}
                   </h3>
                 </div>

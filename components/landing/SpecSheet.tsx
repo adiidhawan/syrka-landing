@@ -107,10 +107,10 @@ export function SpecTable({ rows }: { rows: SpecRow[] }) {
                 <div className="text-[clamp(20px,1.7vw,26px)] font-medium tracking-[-0.02em] text-[var(--lx-ink)]">{s.name}</div>
                 <div className="lx-serif mt-1 text-[18px] text-[#4b3bd6]">{s.subtitle}</div>
               </th>
-              <td className="px-4 py-7 align-top text-[15px] text-[#26232f]">{s.forWho}</td>
-              <td className="px-4 py-7 align-top text-[15px] text-[var(--lx-dim)]">{s.takes}</td>
-              <td className="px-4 py-7 align-top text-[15px] text-[#26232f]">{s.gives}</td>
-              <td className="px-4 py-7 align-top">
+              <td data-label="For" className="px-4 py-7 align-top text-[15px] text-[#26232f]">{s.forWho}</td>
+              <td data-label="Takes in" className="px-4 py-7 align-top text-[15px] text-[var(--lx-dim)]">{s.takes}</td>
+              <td data-label="Gives back" className="px-4 py-7 align-top text-[15px] text-[#26232f]">{s.gives}</td>
+              <td data-label="Status" className="px-4 py-7 align-top">
                 <span className={`lx-mono inline-flex items-center gap-2 rounded-full px-3 py-1.5 ${s.live ? 'bg-[#4b3bd6] text-white' : 'border border-dashed border-[#5b4bd6]/40 text-[#4b3bd6]'}`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${s.live ? 'lx-live-dot bg-white' : 'border border-[#5b4bd6]'}`} />
                   {s.live ? 'Live' : 'In development'}

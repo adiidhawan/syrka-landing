@@ -163,7 +163,7 @@
 
 /* Hero: the name's meaning, centred under the globe's Syrka symbol. Mirrors HERO_GLOBE / HERO_GLOBE_MOBILE in
    app/page.tsx: centre (cx, cy) and radius r × min(viewport); the symbol's feet sit about 1.14r below the centre. */
-.lx-name { left: 50%; top: calc(24dvh + min(100vw, 100dvh) * 0.36 * 1.14 + 14px); transform: translateX(-50%); font-size: 10px; letter-spacing: 0.18em; }
+.lx-name { left: 50%; top: calc(24dvh + min(100vw, 100dvh) * 0.36 * 1.14 + 14px); transform: translateX(-50%); font-size: min(10px, 2.3vw); letter-spacing: 0.12em; }
 @media (min-width: 768px) {
   .lx-name { left: 71%; top: calc(47.5dvh + min(100vw, 100dvh) * 0.33 * 1.14 + 18px); font-size: 11px; }
 }
@@ -233,9 +233,28 @@
 @keyframes lx-fade { from { opacity: 0; } to { opacity: 1; } }
 .lx-rise { animation: lx-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 @keyframes lx-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@media (max-width: 767px) { .lx-chip-a { left: -6px; } .lx-chip-b { right: -6px; } }
+/* Phones: the panel is scaled to fit a short slot, where the chips only collide with the nav and the text. */
+@media (max-width: 767px) { .lx-chip { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   .lx-sway, .lx-chip-a, .lx-chip-b, .lx-rise, .lx-fade { animation: none; }
   .lx-float3d { transform: none; }
 }
 .lx-outline-dark { color: transparent; -webkit-text-stroke: 1.5px rgba(11, 11, 13, 0.55); }
+
+/* Phones: the spec table becomes one stacked card per system, labels taken from data-label. */
+@media (max-width: 767px) {
+  .lx-spec table { min-width: 0; }
+  .lx-spec thead { display: none; }
+  .lx-spec tbody, .lx-spec tr { display: block; }
+  .lx-spec tr { position: relative; padding: 22px 0 22px 44px; }
+  .lx-spec td, .lx-spec th { display: block; padding: 0; }
+  .lx-spec td:first-child { position: absolute; left: 0; top: 0; bottom: 0; width: 44px; padding-top: 22px; }
+  .lx-spec td:first-child > span:not(.lx-spec-num) { left: 12px !important; }
+  .lx-spec td[data-label] { margin-top: 12px; }
+  .lx-spec td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 2px; font-family: var(--lx-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8992; }
+}
+
+/* Phones: slimmer buttons so a pair fits on one line. */
+@media (max-width: 767px) {
+  .lx .specular-button--md { font-size: 0.9rem; padding: 12px 16px; }
+}

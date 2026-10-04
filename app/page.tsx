@@ -210,7 +210,7 @@ function Backdrop({ seed, tone = 'ink' }: { seed: number; tone?: Tone }) {
 
 function Eyebrow({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
   return (
-    <div className={`lx-mono flex items-center gap-4 ${accent ? 'text-[var(--lx-accent-ink)]' : 'text-[var(--lx-dim)]'}`}>
+    <div className={`lx-mono flex items-center gap-4 max-lg:justify-center ${accent ? 'text-[var(--lx-accent-ink)]' : 'text-[var(--lx-dim)]'}`}>
       <span className={`h-px w-8 ${accent ? 'bg-[var(--lx-accent-ink)]' : 'bg-[var(--lx-ink)]'}`} />
       {children}
     </div>
@@ -235,29 +235,29 @@ export default function LandingPage() {
           </div>
 
           {/* ── Hero ─────────────────────────────────────────────── */}
-          <section className="lx-dots relative flex min-h-[100dvh] flex-col justify-end overflow-hidden px-4 pb-10 pt-[50vh] md:justify-center md:px-8 md:pt-28">
+          <section className="lx-dots relative flex min-h-[100dvh] flex-col justify-end overflow-hidden px-5 pb-8 pt-[48dvh] max-md:text-center md:justify-center md:px-8 md:pt-28">
             {/* What the name stands for, set just under the globe and its Syrka symbol (see .lx-name). */}
             <div className="lx-mono lx-name pointer-events-none absolute z-[6] whitespace-nowrap text-[#3a42c4]">
               Systematic · Relational · Knowledge · Architecture
             </div>
 
-            <div className="pointer-events-none relative z-[6] max-w-3xl">
-              <h1 className="font-headline text-[clamp(44px,7vw,104px)] font-medium leading-[0.95] tracking-[-0.04em] text-[#d4d4d8]">
+            <div className="pointer-events-none relative z-[6] max-w-3xl max-md:mx-auto">
+              <h1 className="font-headline text-[clamp(38px,7vw,104px)] font-medium leading-[0.95] tracking-[-0.04em] text-[#d4d4d8]">
                 The Operating System for <span className="lx-serif font-normal text-[var(--lx-accent-ink)]">Human Capability.</span>
               </h1>
-              <p className="mt-6 max-w-xl text-[clamp(16px,1.4vw,19px)] leading-relaxed text-[#a1a1a8]">
+              <p className="mt-6 max-w-xl text-[clamp(15px,1.4vw,19px)] leading-relaxed text-[#a1a1a8] max-md:mx-auto max-md:mt-4">
                 Talent is everywhere. Proof of it rarely is. Syrka turns the work people do into evidence the world can trust, from a first assignment to a nation&apos;s plan for its future.
               </p>
-              <p className="mt-3 max-w-xl text-[clamp(14px,1.1vw,16px)] leading-relaxed text-[#6f6f76]">
+              <p className="mt-3 max-w-xl text-[clamp(14px,1.1vw,16px)] leading-relaxed text-[#6f6f76] max-md:hidden">
                 One record of capability for students, universities, employers and governments.
               </p>
-              <div className="pointer-events-auto mt-8 flex flex-wrap gap-3">
+              <div className="pointer-events-auto mt-8 flex flex-wrap gap-3 max-md:mt-6 max-md:justify-center max-md:gap-2">
                 <SpecularButton href="#software" size="md" radius={14} blur={14} textColor="#ece8ff" lineColor="#d9d0ff" baseColor="#3a3366" style={GHOST_STYLE}>Explore our software</SpecularButton>
                 <SpecularButton href="#closing" size="md" radius={14} textColor="#ffffff" lineColor="#e2dcff" baseColor="#2a1f99" style={DEPLOY_STYLE}>Deploy Syrka →</SpecularButton>
               </div>
             </div>
 
-            <div className="lx-mono pointer-events-none relative z-[6] mt-16 text-[var(--lx-dim)]">
+            <div className="lx-mono pointer-events-none relative z-[6] mt-16 text-[var(--lx-dim)] max-md:hidden">
               <span>/ Institutional capability infrastructure</span>
             </div>
           </section>
@@ -269,18 +269,18 @@ export default function LandingPage() {
               intro={
                 <>
                   <Eyebrow accent>How Syrka works</Eyebrow>
-                  <h2 className="mt-7 font-headline text-[clamp(40px,5.2vw,88px)] font-medium leading-[0.95] tracking-[-0.04em]">
+                  <h2 className="mt-7 font-headline text-[clamp(34px,5.2vw,88px)] font-medium leading-[0.95] tracking-[-0.04em] max-lg:mt-4">
                     Follow what people can do, <span className="lx-serif font-normal text-[var(--lx-accent-ink)]">wherever it goes.</span>
                   </h2>
-                  <p className="mt-7 max-w-2xl text-[clamp(18px,1.5vw,23px)] leading-relaxed text-[#b4b4bb]">
+                  <p className="mt-7 max-w-2xl text-[clamp(15px,1.5vw,23px)] leading-relaxed text-[#b4b4bb] max-lg:mx-auto max-lg:mt-4 max-lg:leading-normal">
                     Most of what a person learns never makes it onto a transcript. Syrka captures it where it happens, has it confirmed by the people who saw it, and lets it travel with them for life.
                   </p>
-                  <p className="mt-4 max-w-2xl text-[clamp(15px,1.2vw,18px)] leading-relaxed text-[var(--lx-dim)]">
+                  <p className="mt-4 max-w-2xl text-[clamp(15px,1.2vw,18px)] leading-relaxed text-[var(--lx-dim)] max-md:hidden">
                     Five connected systems share that one record. A single student project can shape their next course, prove a skill to an employer, and help a ministry see where the country&apos;s talent is heading.
                   </p>
-                  <ol className="mt-8 flex flex-wrap gap-2">
+                  <ol className="mt-8 flex flex-wrap gap-2 max-lg:mt-5 max-lg:justify-center max-md:gap-1.5">
                     {SYSTEMS.map((s, i) => (
-                      <li key={s.id} className="lx-mono rounded-full border border-[#7a5cff]/30 bg-[#7a5cff]/[0.07] px-4 py-2 text-[#c9bcff]">
+                      <li key={s.id} className="lx-mono rounded-full border border-[#7a5cff]/30 bg-[#7a5cff]/[0.07] px-4 py-2 text-[#c9bcff] max-md:px-3 max-md:py-1.5 max-md:!text-[10px]">
                         <span className="mr-2 text-[#7a5cff]">{String(i + 1).padStart(2, '0')}</span>{s.short}
                       </li>
                     ))}
@@ -301,10 +301,10 @@ export default function LandingPage() {
             <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end">
               <div>
                 <Eyebrow accent>The five systems</Eyebrow>
-                <h2 className="mt-7 font-headline text-[clamp(44px,6vw,104px)] font-medium leading-[0.95] tracking-[-0.04em]">
+                <h2 className="mt-7 font-headline text-[clamp(40px,6vw,104px)] font-medium leading-[0.95] tracking-[-0.04em] max-lg:text-center">
                   Five systems, <span className="lx-serif font-normal text-[#4b3bd6]">one record.</span>
                 </h2>
-                <p className="mt-6 max-w-xl text-[clamp(17px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)]">
+                <p className="mt-6 max-w-xl text-[clamp(16px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)] max-lg:mx-auto max-lg:text-center">
                   Each system does one job. All of them read from and write to the same capability record.
                 </p>
               </div>
@@ -361,10 +361,10 @@ export default function LandingPage() {
           <div className="relative grid gap-14 lg:grid-cols-[1fr_1.15fr]">
             <div>
               <Eyebrow accent>Trust &amp; governance</Eyebrow>
-              <h2 className="mt-7 font-headline text-[clamp(40px,5.2vw,88px)] font-medium leading-[0.95] tracking-[-0.04em]">
+              <h2 className="mt-7 font-headline text-[clamp(40px,5.2vw,88px)] font-medium leading-[0.95] tracking-[-0.04em] max-lg:text-center">
                 Built to be <span className="lx-serif font-normal text-[#4b3bd6]">trusted.</span>
               </h2>
-              <p className="mt-6 max-w-lg text-[clamp(17px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)]">
+              <p className="mt-6 max-w-lg text-[clamp(16px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)] max-lg:mx-auto max-lg:text-center">
                 Syrka holds records that shape people&apos;s education and careers. These rules are part of how it is built, not a policy added afterwards.
               </p>
             </div>
@@ -403,16 +403,16 @@ export default function LandingPage() {
             </>
           )}
           <div className="relative">
-            <div className="lx-mono flex flex-wrap gap-x-8 gap-y-2">
+            <div className="lx-mono flex flex-wrap gap-x-8 gap-y-2 max-md:justify-center max-md:gap-x-5">
               {SYSTEMS.map(s => <a key={s.id} href={`#${s.id}`} className="text-[#8f84c9] no-underline hover:text-[var(--lx-ink)]">{s.short}</a>)}
             </div>
-            <h2 className="lx-giant mt-10 text-[clamp(52px,10vw,176px)]">
+            <h2 className="lx-giant mt-10 text-[clamp(44px,10vw,176px)] max-md:text-center">
               Build the capability your future <span className="lx-serif normal-case text-[var(--lx-accent-ink)]">requires.</span>
             </h2>
-            <p className="mt-8 max-w-xl text-[clamp(17px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)]">
+            <p className="mt-8 max-w-xl text-[clamp(16px,1.4vw,21px)] leading-relaxed text-[var(--lx-dim)] max-md:mx-auto max-md:text-center">
               Bring Syrka to your university, company or ministry, and start building one record of what your people can do.
             </p>
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="mt-10 flex flex-wrap gap-3 max-md:justify-center">
               <SpecularButton href={SIGN_IN_HREF} size="md" radius={14} textColor="#ffffff" lineColor="#e2dcff" baseColor="#2a1f99" style={DEPLOY_STYLE}>Deploy Syrka →</SpecularButton>
               <SpecularButton href={CAMPUS_HREF} size="md" radius={14} blur={14} textColor="#ece8ff" lineColor="#d9d0ff" baseColor="#3a3366" style={GHOST_STYLE}>Enter Syrka Campus</SpecularButton>
             </div>
