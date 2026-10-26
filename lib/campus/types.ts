@@ -220,6 +220,8 @@ export interface Job {
   status: 'open' | 'closed'
   /** Lets a job opt out of an evidence component; the engine then re-normalises the weights. */
   evidencePolicy: { projects: boolean; assessments: boolean }
+  /** Set when the skill requirements were derived from real postings (lib/campus/calibration.ts). */
+  calibration?: { postings: number; companies?: number; families: string[]; date: string }
 }
 
 export interface JobSkillRequirement {

@@ -3,6 +3,8 @@ import type {
   EducationRecord, EmployerNote, EvidenceType, Job, JobSkillRequirement, Project, ProjectEvidence, ProjectSkill,
   Skill, SkillSnapshot, Student, StudentSkill, University, VerificationRecord, VerifierKind,
 } from './types'
+import { CALIBRATION, CALIBRATION_DATE } from './calibration'
+import type { RoleFamily } from './live-jobs'
 
 /**
  * Fictional SYRKA Campus demo dataset. No real student, university or employer is represented.
@@ -11,7 +13,8 @@ import type {
  * it any number of times yields an identical dataset and resetting never creates duplicates.
  */
 
-export const SCHEMA_VERSION = 1
+// Bump when the seed changes shape or content, so browsers holding an older copy start again from this seed.
+export const SCHEMA_VERSION = 2
 export const PRIMARY_STUDENT_ID = 's-aarav'
 export const PRIMARY_COMPANY_ID = 'c-northstar'
 
@@ -21,6 +24,9 @@ const SKILLS: Skill[] = [
   { id: 'python', name: 'Python', category: 'programming', aliases: ['py'] },
   { id: 'java', name: 'Java', category: 'programming' },
   { id: 'git', name: 'Git', category: 'programming', aliases: ['version control'] },
+  { id: 'golang', name: 'Go', category: 'programming', aliases: ['golang'] },
+  { id: 'cpp', name: 'C++', category: 'programming', aliases: ['c plus plus'] },
+  { id: 'kotlin', name: 'Kotlin', category: 'programming' },
   { id: 'react', name: 'React', category: 'frontend', aliases: ['reactjs', 'react.js'] },
   { id: 'nextjs', name: 'Next.js', category: 'frontend', aliases: ['next', 'next js'] },
   { id: 'html-css', name: 'HTML & CSS', category: 'frontend', aliases: ['html', 'css', 'html/css'] },
@@ -31,9 +37,15 @@ const SKILLS: Skill[] = [
   { id: 'websockets', name: 'WebSockets', category: 'backend', aliases: ['websocket', 'socket.io'] },
   { id: 'docker', name: 'Docker', category: 'backend', aliases: ['containers'] },
   { id: 'system-design', name: 'System design', category: 'backend', aliases: ['architecture'] },
+  { id: 'cloud-platforms', name: 'Cloud platforms', category: 'backend', aliases: ['aws', 'gcp', 'azure', 'cloud'] },
+  { id: 'kubernetes', name: 'Kubernetes', category: 'backend', aliases: ['k8s'] },
+  { id: 'software-testing', name: 'Software testing', category: 'backend', aliases: ['test automation', 'unit testing'] },
+  { id: 'kafka', name: 'Kafka', category: 'backend' },
   { id: 'sql', name: 'SQL', category: 'data_ai', aliases: ['postgres', 'postgresql', 'mysql'] },
   { id: 'data-visualization', name: 'Data visualization', category: 'data_ai', aliases: ['data viz', 'dataviz', 'visualisation'] },
   { id: 'pandas', name: 'pandas', category: 'data_ai' },
+  { id: 'spark', name: 'Spark', category: 'data_ai', aliases: ['pyspark', 'apache spark'] },
+  { id: 'excel', name: 'Excel', category: 'data_ai', aliases: ['spreadsheets'] },
   { id: 'statistics', name: 'Statistics', category: 'data_ai', aliases: ['stats'] },
   { id: 'machine-learning', name: 'Machine learning', category: 'data_ai', aliases: ['ml'] },
   { id: 'model-evaluation', name: 'Model evaluation', category: 'data_ai' },
@@ -144,6 +156,7 @@ const STUDENTS: StudentSpec[] = [
       { skill: 'system-design', p: 72, ev: 'project_demonstrated' },
       { skill: 'websockets', p: 78, ev: 'project_demonstrated', review: { projectKey: 'collab' } },
       { skill: 'fastapi', p: 70, ev: 'project_demonstrated', review: 'pending' },
+      { skill: 'api-development', p: 74, ev: 'project_demonstrated', review: 'pending' },
       { skill: 'nlp', p: 64, ev: 'project_demonstrated', review: 'pending' },
       { skill: 'data-visualization', p: 70, ev: 'project_demonstrated' },
       { skill: 'html-css', p: 86, ev: 'self_reported' },
@@ -203,9 +216,12 @@ const STUDENTS: StudentSpec[] = [
       { skill: 'statistics', p: 76, ev: 'institution_verified', by: { kind: 'institution', name: 'Northfield University', note: 'Probability and Statistics, grade A' } },
       { skill: 'pandas', p: 78, ev: 'project_demonstrated', review: { projectKey: 'retail' } },
       { skill: 'communication', p: 80, ev: 'self_reported' },
+      { skill: 'problem-solving', p: 82, ev: 'self_reported' },
+      { skill: 'excel', p: 85, ev: 'self_reported' },
     ],
     projects: [
-      { key: 'retail', name: 'Retail Footfall Forecasting', summary: 'Weekly footfall forecasts and a store-manager dashboard for a fictional retail chain.', problem: 'Staff rosters ignored predictable weekly peaks.', implementation: 'SQL feature tables, pandas, seasonal models and an interactive dashboard.', contribution: 'Owned the data model and dashboard.', role: 'Lead', completedAt: '2026-05-20', skills: ['sql', 'pandas', 'data-visualization', 'statistics'], evidence: [{ label: 'Report (demo)', url: 'https://demo.syrka.example/priya/footfall', kind: 'report' }], review: { status: 'verified', by: 'Faculty reviewer, Northfield University', at: '2026-06-04T10:00:00.000Z', note: 'Reviewed model and dashboard.' } },
+      { key: 'retail'
+, name: 'Retail Footfall Forecasting', summary: 'Weekly footfall forecasts and a store-manager dashboard for a fictional retail chain.', problem: 'Staff rosters ignored predictable weekly peaks.', implementation: 'SQL feature tables, pandas, seasonal models and an interactive dashboard.', contribution: 'Owned the data model and dashboard.', role: 'Lead', completedAt: '2026-05-20', skills: ['sql', 'pandas', 'data-visualization', 'statistics'], evidence: [{ label: 'Report (demo)', url: 'https://demo.syrka.example/priya/footfall', kind: 'report' }], review: { status: 'verified', by: 'Faculty reviewer, Northfield University', at: '2026-06-04T10:00:00.000Z', note: 'Reviewed model and dashboard.' } },
       { key: 'survey', name: 'Campus Transport Survey', summary: 'Analysis of 1,200 survey responses on student commuting.', problem: 'The transport office had raw responses but no summary.', implementation: 'Cleaning in pandas, charts and a written brief.', contribution: 'Analysis and brief.', role: 'Solo', completedAt: '2025-12-10', skills: ['python', 'data-visualization', 'communication'], review: { status: 'unverified' } },
     ],
   },
@@ -223,6 +239,7 @@ const STUDENTS: StudentSpec[] = [
       { skill: 'docker', p: 66, ev: 'self_reported' },
       { skill: 'system-design', p: 64, ev: 'self_reported' },
       { skill: 'nodejs', p: 60, ev: 'self_reported' },
+      { skill: 'cloud-platforms', p: 62, ev: 'self_reported' },
     ],
     projects: [
       { key: 'ledger', name: 'Hostel Expense Ledger API', summary: 'A REST API for splitting shared hostel expenses.', problem: 'Shared costs were tracked in chat messages.', implementation: 'FastAPI, SQLite, token auth, 92% test coverage.', contribution: 'Sole developer.', role: 'Solo', completedAt: '2026-03-02', skills: ['python', 'fastapi', 'api-development', 'sql'], evidence: [{ label: 'Repository (demo)', url: 'https://demo.syrka.example/rohan/ledger-api', kind: 'repository' }], review: { status: 'verified', by: 'Faculty reviewer, Riverside College of Engineering', at: '2026-03-20T10:00:00.000Z', note: 'Code review and API walkthrough.' } },
@@ -259,6 +276,7 @@ const STUDENTS: StudentSpec[] = [
       { skill: 'nlp', p: 74, ev: 'project_demonstrated', review: { projectKey: 'eval' } },
       { skill: 'sql', p: 62, ev: 'self_reported' },
       { skill: 'statistics', p: 80, ev: 'self_reported' },
+      { skill: 'communication', p: 72, ev: 'self_reported' },
     ],
     projects: [
       { key: 'eval', name: 'Hindi–English Sentiment Benchmark', summary: 'An evaluation suite for sentiment models on code-mixed text.', problem: 'Public benchmarks ignore code-mixed language.', implementation: 'Labelled 4,000 synthetic sentences, built metrics and error-slice reports.', contribution: 'Dataset design and evaluation harness.', role: 'Lead', completedAt: '2026-05-15', skills: ['python', 'nlp', 'model-evaluation', 'machine-learning'], evidence: [{ label: 'Repository (demo)', url: 'https://demo.syrka.example/kabir/codemix-bench', kind: 'repository' }], review: { status: 'verified', by: 'Faculty reviewer, Demo Institute of Technology', at: '2026-06-01T10:00:00.000Z', note: 'Reviewed evaluation methodology.' } },
@@ -290,7 +308,10 @@ const STUDENTS: StudentSpec[] = [
     skills: [
       { skill: 'react', p: 84, ev: 'project_demonstrated', review: { projectKey: 'fleet' } },
       { skill: 'typescript', p: 80, ev: 'self_reported' },
-      { skill: 'nextjs', p: 76, ev: 'project_demonstrated', review: { projectKey: 'fleet' } },
+      { skill: 'javascript', p: 84, ev: 'self_reported' },
+      { skill: 'cloud-platforms', p: 58, ev: 'self_reported' },
+      { skill: 'nextjs', p: 76,
+ ev: 'project_demonstrated', review: { projectKey: 'fleet' } },
       { skill: 'nodejs', p: 82, ev: 'employer_verified', by: { kind: 'employer', name: 'Internship supervisor (demo company)', note: 'Summer 2026 engineering internship' } },
       { skill: 'api-development', p: 74, ev: 'project_demonstrated', review: { projectKey: 'fleet' } },
       { skill: 'sql', p: 66, ev: 'self_reported' },
@@ -361,6 +382,7 @@ const STUDENTS: StudentSpec[] = [
       { skill: 'statistics', p: 82, ev: 'institution_verified', by: { kind: 'institution', name: 'Demo Institute of Technology', note: 'Engineering Statistics, grade A' } },
       { skill: 'data-visualization', p: 74, ev: 'project_demonstrated' },
       { skill: 'sql', p: 55, ev: 'self_reported' },
+      { skill: 'excel', p: 82, ev: 'self_reported' },
       { skill: 'quantitative-reasoning', p: 85, ev: 'institution_verified', by: { kind: 'institution', name: 'Demo Institute of Technology', note: 'Operations Research, grade A' } },
     ],
     projects: [
@@ -412,10 +434,35 @@ const STUDENTS: StudentSpec[] = [
   },
 ]
 
-interface JobSpec extends Omit<Job, 'evidencePolicy' | 'status'> {
+interface JobSpec extends Omit<Job, 'evidencePolicy' | 'status' | 'calibration'> {
+  /** Hand-written requirements, used only when the job has no calibration or too few postings back it. */
   required: [string, number][]
   preferred: [string, number][]
   evidencePolicy?: Job['evidencePolicy']
+  /** Derive requirements from real postings in these role families, at these [required, preferred] levels. */
+  calibrate?: { families: RoleFamily[]; levels: [number, number]; maxRequired?: number }
+}
+
+/** Fewest postings a calibration needs before it replaces the hand-written requirements. */
+export const MIN_CALIBRATION_POSTINGS = 8
+
+/**
+ * Turns real-posting skill shares into job requirements, mechanically: up to `maxRequired` (default 3) skills that
+ * appear in at least half of the postings become required; the next up to 3 skills that appear in at least 30%
+ * become preferred. Shares from several families are pooled, weighted by their number of postings. Returns null
+ * when fewer than MIN_CALIBRATION_POSTINGS postings back the families, so thin samples never set requirements.
+ */
+export function deriveRequirements(families: RoleFamily[], maxRequired = 3) {
+  const present = families.map(f => CALIBRATION[f]).filter(c => c !== undefined)
+  const postings = present.reduce((t, c) => t + c.postings, 0)
+  if (postings < MIN_CALIBRATION_POSTINGS) return null
+  const pooled = new Map<string, number>()
+  for (const c of present) for (const k of c.skills) pooled.set(k.skillId, (pooled.get(k.skillId) ?? 0) + k.share * c.postings)
+  const ranked = [...pooled.entries()].map(([skillId, n]) => ({ skillId, share: n / postings })).sort((a, b) => b.share - a.share || a.skillId.localeCompare(b.skillId))
+  const required = ranked.filter(r => r.share >= 0.5).slice(0, maxRequired)
+  const preferred = ranked.filter(r => !required.includes(r) && r.share >= 0.3).slice(0, 3)
+  // Company counts cannot be pooled (one company can post in several families), so they are kept for one family only.
+  return { required, preferred, postings, companies: present.length === 1 ? present[0].companies : undefined }
 }
 
 const JOBS: JobSpec[] = [
@@ -424,6 +471,7 @@ const JOBS: JobSpec[] = [
     description: 'Build the operator console our customers use all day: dense tables, live updates and keyboard-first workflows.',
     responsibilities: ['Ship features in a Next.js and TypeScript codebase', 'Work with design on interaction details', 'Keep the console fast with thousands of live rows'],
     experience: 'Graduating students and early-career engineers. Shipped project work matters more than years.', postedAt: '2026-09-20',
+    calibrate: { families: ['frontend', 'fullstack'], levels: [75, 60] },
     required: [['react', 75], ['typescript', 75], ['nextjs', 70]], preferred: [['html-css', 70], ['system-design', 60], ['frontend-testing', 60]],
   },
   {
@@ -431,6 +479,7 @@ const JOBS: JobSpec[] = [
     description: 'Design and run the APIs behind our routing and scheduling products.',
     responsibilities: ['Build and document Python services', 'Model data in SQL', 'Own on-call for services you build'],
     experience: 'Graduating students with backend project work.', postedAt: '2026-09-22',
+    calibrate: { families: ['backend'], levels: [70, 60] },
     required: [['python', 70], ['sql', 70], ['api-development', 70]], preferred: [['docker', 60], ['system-design', 65]],
   },
   {
@@ -438,6 +487,7 @@ const JOBS: JobSpec[] = [
     description: 'Help customers understand their operations data and help us decide what to build.',
     responsibilities: ['Write SQL against our warehouse', 'Build dashboards for customer success', 'Present findings to non-technical teams'],
     experience: 'Graduating students; analytics coursework or projects.', postedAt: '2026-09-25',
+    calibrate: { families: ['data_analyst'], levels: [75, 65] },
     required: [['sql', 75], ['python', 65], ['data-visualization', 70]], preferred: [['statistics', 65], ['communication', 70]],
   },
   {
@@ -445,6 +495,7 @@ const JOBS: JobSpec[] = [
     description: 'Design workflows for operators who use our product for eight hours a day.',
     responsibilities: ['Run research with operators', 'Prototype and test flows', 'Contribute to the design system'],
     experience: 'A portfolio with research-led case studies.', postedAt: '2026-10-01',
+    calibrate: { families: ['design'], levels: [75, 60] },
     required: [['figma', 75], ['interaction-design', 70], ['user-research', 65]], preferred: [['prototyping', 60], ['communication', 70]],
   },
   {
@@ -452,6 +503,7 @@ const JOBS: JobSpec[] = [
     description: 'Build and evaluate the demand-forecasting models behind our scheduling engine.',
     responsibilities: ['Train and evaluate models', 'Build evaluation datasets', 'Work with backend engineers to deploy models'],
     experience: 'Graduating students with applied ML projects.', postedAt: '2026-10-03',
+    calibrate: { families: ['ml'], levels: [80, 65] },
     required: [['python', 80], ['machine-learning', 75], ['model-evaluation', 70]], preferred: [['sql', 60], ['statistics', 65]],
   },
   {
@@ -459,6 +511,7 @@ const JOBS: JobSpec[] = [
     description: 'Build pipelines that feed client dashboards.',
     responsibilities: ['Write and test SQL transformations', 'Automate data loads in Python'],
     experience: 'Graduating students.', postedAt: '2026-09-15',
+    calibrate: { families: ['data_engineer'], levels: [75, 60] },
     required: [['sql', 75], ['python', 70], ['pandas', 60]], preferred: [['docker', 50]],
   },
   {
@@ -466,6 +519,7 @@ const JOBS: JobSpec[] = [
     description: 'Six-month internship supporting client analytics projects.',
     responsibilities: ['Prepare data extracts', 'Build simple dashboards'],
     experience: 'Students in their final or pre-final year.', postedAt: '2026-10-05',
+    calibrate: { families: ['data_analyst'], levels: [60, 55], maxRequired: 2 },
     required: [['sql', 60], ['data-visualization', 60]], preferred: [['communication', 65]],
     // Internship screening here relies on coursework, so project evidence is not part of the requirement.
     evidencePolicy: { projects: false, assessments: true },
@@ -475,6 +529,7 @@ const JOBS: JobSpec[] = [
     description: 'Build features for a classroom tool used by teachers.',
     responsibilities: ['Ship React features end to end', 'Write Node.js API endpoints'],
     experience: 'Students with at least one full-stack project.', postedAt: '2026-09-28',
+    calibrate: { families: ['fullstack'], levels: [65, 55] },
     required: [['react', 65], ['nodejs', 65], ['api-development', 60]], preferred: [['typescript', 60], ['edtech', 50]],
   },
   {
@@ -482,6 +537,7 @@ const JOBS: JobSpec[] = [
     description: 'Evaluate language models on clinical note summarisation.',
     responsibilities: ['Build evaluation sets', 'Run and analyse experiments'],
     experience: 'Students with NLP coursework or projects.', postedAt: '2026-10-08',
+    calibrate: { families: ['ml'], levels: [70, 60] },
     required: [['python', 75], ['nlp', 70], ['machine-learning', 65]], preferred: [],
   },
   {
@@ -489,6 +545,7 @@ const JOBS: JobSpec[] = [
     description: 'Build the internal platform our payments services run on.',
     responsibilities: ['Build TypeScript services on Node.js', 'Design for reliability'],
     experience: 'Graduating students with systems projects.', postedAt: '2026-10-10',
+    calibrate: { families: ['platform'], levels: [70, 60] },
     required: [['typescript', 70], ['nodejs', 70], ['system-design', 70]], preferred: [['sql', 65], ['fintech', 50]],
   },
 ]
@@ -582,10 +639,16 @@ export function createSeedState(): DemoState {
   const jobs: Job[] = []
   const jobRequirements: JobSkillRequirement[] = []
   for (const j of JOBS) {
-    const { required, preferred, evidencePolicy, ...job } = j
-    jobs.push({ ...job, status: 'open', evidencePolicy: evidencePolicy ?? { projects: true, assessments: true } })
-    for (const [skillId, min] of required) jobRequirements.push({ id: id('req'), jobId: j.id, skillId, kind: 'required', minProficiency: min })
-    for (const [skillId, min] of preferred) jobRequirements.push({ id: id('req'), jobId: j.id, skillId, kind: 'preferred', minProficiency: min })
+    const { required, preferred, evidencePolicy, calibrate, ...job } = j
+    const derived = calibrate ? deriveRequirements(calibrate.families, calibrate.maxRequired) : null
+    const req: [string, number][] = derived && calibrate ? derived.required.map(r => [r.skillId, calibrate.levels[0]]) : required
+    const pref: [string, number][] = derived && calibrate ? derived.preferred.map(r => [r.skillId, calibrate.levels[1]]) : preferred
+    jobs.push({
+      ...job, status: 'open', evidencePolicy: evidencePolicy ?? { projects: true, assessments: true },
+      calibration: derived && calibrate ? { postings: derived.postings, companies: derived.companies, families: calibrate.families, date: CALIBRATION_DATE } : undefined,
+    })
+    for (const [skillId, min] of req) jobRequirements.push({ id: id('req'), jobId: j.id, skillId, kind: 'required', minProficiency: min })
+    for (const [skillId, min] of pref) jobRequirements.push({ id: id('req'), jobId: j.id, skillId, kind: 'preferred', minProficiency: min })
   }
 
   const shortlists: CandidateShortlist[] = [

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Briefcase, MapPin, Search } from 'lucide-react'
 import { ConfidenceTag, MatchActions } from '@/components/campus/MatchBreakdown'
+import OpportunityTabs from '@/components/campus/OpportunityTabs'
 import { EmptyState, PageHeader, ScoreBadge, Tag } from '@/components/campus/ui'
 import { PRIMARY_STUDENT_ID } from '@/lib/campus/seed'
 import { useDemoState } from '@/lib/campus/store'
@@ -32,6 +33,8 @@ export default function OpportunitiesView({ initialQuery = '' }: { initialQuery?
   return (
     <>
       <PageHeader eyebrow="Opportunities" title="Recommended jobs and internships" description="Every percentage is requirement alignment: how your profile compares with what the job lists. It is not a chance of being hired." />
+      <OpportunityTabs />
+      <p className="mb-4 text-[12.5px] text-cx-dim">Demo roles are at fictional companies. Their skill requirements are derived from real Indian job postings for the same kind of role.</p>
 
       <div className="cx-card mb-4 grid grid-cols-2 gap-2 p-3 sm:flex sm:flex-wrap">
         <div className="relative col-span-2 min-w-[200px] flex-1">

@@ -1,4 +1,5 @@
 import { ASSESSMENTS } from './assessments'
+import { INFERRED_LEVELS, LIVE_SKILL_NAMES, type LiveJob } from './live-jobs'
 import { calculateCandidateMatch, type CandidateInput, type JobRequirementsInput, type MatchResult } from './matching'
 import type {
   Achievement, Company, DemoState, EducationRecord, EvidenceType, Job, Project, ProjectEvidence, Skill, Student,
@@ -98,6 +99,16 @@ export function jobRequirements(state: DemoState, jobId: string): JobRequirement
 /** The student's own view of a match: uses their full profile. */
 export function studentMatch(state: DemoState, studentId: string, jobId: string): MatchResult {
   return calculateCandidateMatch(candidateInputFrom(skillsFor(state, studentId), projectsFor(state, studentId)), jobRequirements(state, jobId), { assessableSkillIds: ASSESSABLE })
+}
+
+/** A student's match against a real posting. Requirements are the inferred skills at the assumed demo levels. */
+export function liveMatch(state: DemoState, studentId: string, job: LiveJob): MatchResult {
+  const toReq = (level: number) => (id: string) => ({ skillId: id, name: skillById(state, id)?.name ?? LIVE_SKILL_NAMES[id] ?? id, minProficiency: level })
+  return calculateCandidateMatch(
+    candidateInputFrom(skillsFor(state, studentId), projectsFor(state, studentId)),
+    { required: job.required.map(toReq(INFERRED_LEVELS.required)), preferred: job.preferred.map(toReq(INFERRED_LEVELS.preferred)) },
+    { assessableSkillIds: ASSESSABLE },
+  )
 }
 
 export function studentJobMatches(state: DemoState, studentId: string) {
