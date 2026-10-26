@@ -1,18 +1,21 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Briefcase, ExternalLink, MapPin, TriangleAlert } from 'lucide-react'
+import { ArrowLeft, Briefcase, MapPin, TriangleAlert } from 'lucide-react'
 import { EvidenceSummary, Explanation, Improvements, Limitations, MatchActions, RequirementList, ScoreComponents } from '@/components/campus/MatchBreakdown'
 import { Card, PageHeader, Time } from '@/components/campus/ui'
 import { ASSUMED_LEVELS, FAMILY_LABEL, HIMALAYAS_HOME, isSeniorTitle, type LiveJob } from '@/lib/campus/live-jobs'
 import { liveMatch, liveSkillName } from '@/lib/campus/queries'
 import { PRIMARY_STUDENT_ID } from '@/lib/campus/seed'
-import { useDemoState } from '@/lib/campus/store'
-import { applyHref, applyLabel, ExperienceTag, SourceLine } from './LiveOpeningsView'
+import { recordLiveView, useDemoState, useHydrated } from '@/lib/campus/store'
+import { ExperienceTag, LiveJobActions, SourceLine } from './LiveOpeningsView'
 
 export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { job: LiveJob; verifiedAt: string; verified: boolean }) {
   const state = useDemoState()
   const match = liveMatch(state, PRIMARY_STUDENT_ID, job)
+  const hydrated = useHydrated()
+  useEffect(() => { if (hydrated) recordLiveView(PRIMARY_STUDENT_ID, job) }, [hydrated, job])
   const senior = (job.minYears !== null && job.minYears >= 3) || (job.minYears === null && isSeniorTitle(job.title) && !job.seniority.includes('Entry-level'))
   return (
     <>
@@ -27,7 +30,7 @@ export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { j
           {job.expiresAt && <span>Closes by <Time iso={job.expiresAt} /></span>}
         </span>}
         actions={<>
-          <a href={applyHref(job)} target="_blank" rel="noreferrer noopener" className="cx-btn cx-btn-primary">{applyLabel(job)} <ExternalLink size={13} aria-hidden /></a>
+          <LiveJobActions job={job} primaryApply />
           {match.status === 'ok' && <MatchActions match={match} perspective="student" />}
         </>}
       />

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  Bell, Briefcase, Building2, ChartColumn, FolderKanban, Gauge, GraduationCap, LayoutDashboard, Menu, Search,
+  Bell, Briefcase, Building2, ChartColumn, Database, FolderKanban, GitBranch, Gauge, GraduationCap, LayoutDashboard, Menu, Search,
   Settings, Shield, Sparkles, Target, UserRound, Users,
 } from 'lucide-react'
 import { SyrkaSymbol } from '@/components/landing/brand'
@@ -22,7 +22,9 @@ const NAV: Record<Persona, { href: string; label: string; Icon: typeof Gauge }[]
     { href: '/demo/student/skills', label: 'Skills & assessments', Icon: Sparkles },
     { href: '/demo/student/projects', label: 'Projects', Icon: FolderKanban },
     { href: '/demo/student/opportunities', label: 'Opportunities', Icon: Target },
+    { href: '/demo/student/missions', label: 'Open-source missions', Icon: GitBranch },
     { href: '/demo/student/settings', label: 'Visibility & sharing', Icon: Settings },
+    { href: '/demo/student/data-sources', label: 'Data sources', Icon: Database },
   ],
   employer: [
     { href: '/demo/employer', label: 'Dashboard', Icon: LayoutDashboard },

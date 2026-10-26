@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ExternalLink, FolderKanban, Pencil, Plus, Send, Trash2, X } from 'lucide-react'
+import RepoConnect from '@/components/campus/RepoConnect'
 import { Card, clearQuery, cn, ConfirmButton, Dialog, EmptyState, Field, Flash, PageHeader, Tag, Time, useFlash, VerificationBadge } from '@/components/campus/ui'
 import { CATEGORY_LABEL, projectsFor, type ProjectView } from '@/lib/campus/queries'
 import { PRIMARY_STUDENT_ID } from '@/lib/campus/seed'
@@ -118,6 +119,7 @@ function ProjectCard({ p, onEdit, onDelete, onReview }: { p: ProjectView; onEdit
       </div>
       {p.review && <p className="mt-3 rounded-[8px] bg-cx-ok-soft px-3 py-2 text-[12.5px] text-cx-ok">Reviewed by {p.review.verifierName} on <Time iso={p.review.verifiedAt} />: {p.review.note}</p>}
       {p.verificationStatus === 'pending' && <p className="mt-3 text-[12.5px] text-cx-dim">Submitted for faculty review. In this demo, reviews are not completed automatically.</p>}
+      <RepoConnect projectId={p.id} />
       <div className="mt-4 flex flex-wrap gap-2 border-t border-cx-line pt-4">
         <button className="cx-btn cx-btn-sm" onClick={onEdit}><Pencil size={12} aria-hidden />Edit</button>
         {p.verificationStatus === 'unverified' && <button className="cx-btn cx-btn-sm" onClick={onReview}><Send size={12} aria-hidden />Request faculty review</button>}

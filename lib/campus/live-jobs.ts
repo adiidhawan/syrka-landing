@@ -35,6 +35,8 @@ export interface LiveJob {
   company: string
   title: string
   location: string
+  /** True when the role is open to candidates anywhere; false when restricted to India (or India-based). */
+  openWorldwide: boolean
   /** The only link an Apply action may use (Himalayas' applicationLink, or the partner's posting URL). */
   applyUrl: string
   postedAt: string | null
@@ -281,7 +283,7 @@ export function himalayasToLiveJob(j: Json): LiveJob | null {
   return {
     id, source: 'himalayas', sourceLabel: 'Himalayas', sourceHome: HIMALAYAS_HOME,
     company: str(j.companyName) || 'Company not named', title,
-    location: countries.length ? `Remote · ${countries.join(', ')}` : 'Remote · open worldwide',
+    location: countries.length ? `Remote · ${countries.join(', ')}` : 'Remote · open worldwide', openWorldwide: countries.length === 0,
     applyUrl, postedAt: fromUnix(j.pubDate), expiresAt: fromUnix(j.expiryDate), family,
     seniority: strs(j.seniority), employmentType, minYears: parseMinYears(title, text), ...skills,
   }
@@ -360,7 +362,7 @@ export function partnerToLiveJob(b: PartnerBoard, p: RawPosting): LiveJob | null
   return {
     id: `${b.source}--${b.board}--${p.id}`.replace(/[^a-zA-Z0-9-]/g, ''),
     source: b.source, sourceLabel: `${b.company} careers (partner)`, sourceHome: p.url,
-    company: b.company, title: p.title, location: p.location.replace(/\s+/g, ' ').trim(),
+    company: b.company, title: p.title, location: p.location.replace(/\s+/g, ' ').trim(), openWorldwide: false,
     applyUrl: p.url, postedAt: p.postedAt, expiresAt: null, family, seniority: [], employmentType: null,
     minYears: parseMinYears(p.title, p.text), ...skills,
   }

@@ -3,7 +3,10 @@
 import { useSyncExternalStore } from 'react'
 import { applyAttemptToSkill, getAssessment, scoreAttempt, type AttemptResult } from './assessments'
 import { normalizeSkillKey, resolveSkillId } from './matching'
-import { createSeedState, SCHEMA_VERSION } from './seed'
+import type { LiveJob } from './live-jobs'
+import type { Mission, RepoMetadata } from './github'
+import { migrateState } from './migrations'
+import { createSeedState } from './seed'
 import type { ActivityEvent, AssessmentAttempt, DemoState, Project, ProjectEvidence, Skill, Student } from './types'
 
 /**
@@ -27,8 +30,8 @@ function load(): DemoState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) {
-      const parsed = JSON.parse(raw) as DemoState
-      if (parsed?.schemaVersion === SCHEMA_VERSION && Array.isArray(parsed.students)) return parsed
+      const migrated = migrateState(JSON.parse(raw))
+      if (migrated) return migrated
     }
   } catch {
     // Unreadable or blocked storage: fall back to the seed for this session.
@@ -77,6 +80,11 @@ function update(fn: (draft: DemoState) => void) {
   commit(draft)
 }
 
+/** The current state outside React (tests, event handlers). */
+export function readDemoState(): DemoState {
+  return getSnapshot()
+}
+
 export function useDemoState(): DemoState {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
@@ -102,8 +110,10 @@ function studentName(draft: DemoState, id: string) {
 }
 
 export class ValidationError extends Error {
-  constructor(public fields: Record<string, string>) {
+  fields: Record<string, string>
+  constructor(fields: Record<string, string>) {
     super(Object.values(fields)[0] ?? 'Invalid input')
+    this.fields = fields
   }
 }
 
@@ -254,7 +264,6 @@ export function submitAssessment(studentId: string, assessmentId: string, answer
     }
     const updated = applyAttemptToSkill(skill, attempt, verificationId)
     d.studentSkills = d.studentSkills.map(s => (s.id === skill!.id ? updated : s))
-    d.skillHistory.push({ studentId, skillId: assessment.skillId, date: attempt.completedAt.slice(0, 10), proficiency: updated.proficiency, illustrative: false })
     log(d, { kind: 'assessment_completed', actor: 'student', studentId, message: `Completed “${assessment.title}” — ${result.correct} of ${result.total} correct${result.passed ? '' : ' (below the pass mark)'}` })
   })
   return { attempt, result }
@@ -409,6 +418,62 @@ export function recordJobView(studentId: string, jobId: string) {
     const j = d.jobs.find(x => x.id === jobId)
     if (!j) return
     log(d, { kind: 'job_viewed', actor: 'student', studentId, jobId, message: `Viewed “${j.title}” at ${d.companies.find(c => c.id === j.companyId)?.name}` })
+  })
+}
+
+// ── Live opportunities, missions and repositories (real interactions only) ───────────────────────────────────────
+
+/** Records that the student opened a live opening's detail page. Consecutive views of the same opening log once. */
+export function recordLiveView(studentId: string, job: Pick<LiveJob, 'id' | 'title' | 'company'>) {
+  const last = getSnapshot().activity.find(a => a.studentId === studentId && a.actor === 'student')
+  if (last?.kind === 'live_job_viewed' && last.ref?.id === job.id) return
+  update(d => log(d, { kind: 'live_job_viewed', actor: 'student', studentId, ref: { kind: 'live_job', id: job.id }, message: `Viewed the live opening “${job.title}” at ${job.company}` }))
+}
+
+export function toggleSavedOpportunity(studentId: string, job: Pick<LiveJob, 'id' | 'title' | 'company' | 'sourceLabel'>) {
+  update(d => {
+    const saved = d.savedOpportunities.some(o => o.jobId === job.id)
+    d.savedOpportunities = saved
+      ? d.savedOpportunities.filter(o => o.jobId !== job.id)
+      : [{ jobId: job.id, title: job.title, company: job.company, sourceLabel: job.sourceLabel, savedAt: now() }, ...d.savedOpportunities]
+    log(d, { kind: saved ? 'opportunity_unsaved' : 'opportunity_saved', actor: 'student', studentId, ref: { kind: 'live_job', id: job.id }, message: `${saved ? 'Removed' : 'Saved'} “${job.title}” at ${job.company}` })
+  })
+}
+
+/** Records an Apply click on a live opening (the click itself goes to the source through the closure check). */
+export function recordApplicationOpened(studentId: string, job: Pick<LiveJob, 'id' | 'title' | 'company' | 'sourceLabel'>) {
+  update(d => log(d, { kind: 'application_opened', actor: 'student', studentId, ref: { kind: 'live_job', id: job.id }, message: `Opened the application for “${job.title}” at ${job.company} on ${job.sourceLabel}` }))
+}
+
+export function setOpportunityDismissed(studentId: string, job: Pick<LiveJob, 'id' | 'title' | 'company'>, dismissed: boolean) {
+  update(d => {
+    const was = d.dismissedOpportunities.some(o => o.jobId === job.id)
+    if (was === dismissed) return
+    d.dismissedOpportunities = dismissed ? [{ jobId: job.id, at: now() }, ...d.dismissedOpportunities] : d.dismissedOpportunities.filter(o => o.jobId !== job.id)
+    log(d, { kind: dismissed ? 'opportunity_dismissed' : 'opportunity_restored', actor: 'student', studentId, ref: { kind: 'live_job', id: job.id }, message: dismissed ? `Marked “${job.title}” at ${job.company} as not interested` : `Restored “${job.title}” at ${job.company}` })
+  })
+}
+
+export function toggleSavedMission(studentId: string, mission: Pick<Mission, 'id' | 'repo' | 'title' | 'url'>) {
+  update(d => {
+    const saved = d.savedMissions.some(m => m.id === mission.id)
+    d.savedMissions = saved ? d.savedMissions.filter(m => m.id !== mission.id) : [{ id: mission.id, repo: mission.repo, title: mission.title, url: mission.url, savedAt: now() }, ...d.savedMissions]
+    log(d, { kind: saved ? 'mission_unsaved' : 'mission_saved', actor: 'student', studentId, ref: { kind: 'mission', id: mission.id, url: mission.url }, message: `${saved ? 'Removed' : 'Saved'} the open-source mission “${mission.title}” (${mission.repo})` })
+  })
+}
+
+/** Stores public repository metadata fetched from GitHub against a project. Never changes skills or verification. */
+export function saveConnectedRepo(studentId: string, projectId: string, meta: RepoMetadata) {
+  update(d => {
+    const existing = d.connectedRepos.find(r => r.projectId === projectId && r.fullName.toLowerCase() === meta.fullName.toLowerCase())
+    d.connectedRepos = [{ projectId, ...meta }, ...d.connectedRepos.filter(r => r !== existing)]
+    log(d, { kind: existing ? 'repo_refreshed' : 'repo_connected', actor: 'student', studentId, ref: { kind: 'repo', id: meta.fullName, url: meta.url }, message: `${existing ? 'Refreshed' : 'Connected'} the public repository ${meta.fullName}` })
+  })
+}
+
+export function disconnectRepo(projectId: string, fullName: string) {
+  update(d => {
+    d.connectedRepos = d.connectedRepos.filter(r => !(r.projectId === projectId && r.fullName === fullName))
   })
 }
 

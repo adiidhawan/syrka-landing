@@ -38,3 +38,6 @@ next-env.d.ts
 # supabase
 supabase/.temp/
 .env*
+
+# local demo data (market-demand snapshots)
+/.data/

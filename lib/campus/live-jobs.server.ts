@@ -9,6 +9,7 @@ import { checkLiveJob, fetchLiveJobs, parsePartnerBoards, type ClosureCheck, typ
  *   CAMPUS_PARTNER_BOARDS          allow-listed employer boards (see parsePartnerBoards)
  */
 
+export const LIVE_JOBS_TAG = 'campus-live-jobs'
 const MAX_AGE_HOURS = Number(process.env.CAMPUS_LIVE_MAX_AGE_HOURS) || 36
 const himalayasKey = process.env.HIMALAYAS_API_KEY || undefined
 
@@ -16,8 +17,8 @@ const himalayasKey = process.env.HIMALAYAS_API_KEY || undefined
 // the cache does not store errors, so the last good result keeps being served until it ages out below.
 const cachedLiveJobs = unstable_cache(
   () => fetchLiveJobs({ partners: parsePartnerBoards(process.env.CAMPUS_PARTNER_BOARDS), himalayasKey }),
-  ['campus-live-jobs-v4'],
-  { revalidate: 43200 },
+  ['campus-live-jobs-v5'],
+  { revalidate: 43200, tags: [LIVE_JOBS_TAG] },
 )
 
 export type LiveState =

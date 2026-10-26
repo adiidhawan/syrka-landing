@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test:campus": "node --import ./tests/campus/resolve-ts.mjs --test --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/campus/*.test.mjs",
-    "campus:calibrate": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/campus-calibrate.mjs"
+    "campus:calibrate": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/campus-calibrate.mjs",
+    "campus:onet": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/campus-onet.mjs"
   },
   "dependencies": {
     "@tailwindcss/container-queries": "^0.1.1",

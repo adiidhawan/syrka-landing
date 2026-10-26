@@ -1,7 +1,7 @@
 import type {
   Achievement, ActivityEvent, AssessmentAttempt, CandidateReview, CandidateShortlist, Company, DemoState,
   EducationRecord, EmployerNote, EvidenceType, Job, JobSkillRequirement, Project, ProjectEvidence, ProjectSkill,
-  Skill, SkillSnapshot, Student, StudentSkill, University, VerificationRecord, VerifierKind,
+  Skill, Student, StudentSkill, University, VerificationRecord, VerifierKind,
 } from './types'
 import { CALIBRATION, CALIBRATION_DATE } from './calibration'
 import type { RoleFamily } from './live-jobs'
@@ -14,7 +14,7 @@ import type { RoleFamily } from './live-jobs'
  */
 
 // Bump when the seed changes shape or content, so browsers holding an older copy start again from this seed.
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
 export const PRIMARY_STUDENT_ID = 's-aarav'
 export const PRIMARY_COMPANY_ID = 'c-northstar'
 
@@ -669,21 +669,11 @@ export function createSeedState(): DemoState {
     { id: id('note'), companyId: PRIMARY_COMPANY_ID, studentId: 's-priya', body: 'SQL assessment 5/5 and a reviewed forecasting project. Good fit for customer analytics.', createdAt: '2026-10-14T10:05:00.000Z' },
   ]
 
+  // Fictional employer activity only. The student starts with no activity: their record begins with what they do.
   const activity: ActivityEvent[] = [
-    { id: id('act'), kind: 'project_added', actor: 'student', studentId: PRIMARY_STUDENT_ID, message: 'Added the project “Student Performance Analytics”', createdAt: '2026-08-30T15:00:00.000Z' },
-    { id: id('act'), kind: 'assessment_completed', actor: 'student', studentId: PRIMARY_STUDENT_ID, message: 'Completed “Python foundations” — 4 of 5 correct', createdAt: '2026-09-18T10:20:00.000Z' },
-    { id: id('act'), kind: 'skill_updated', actor: 'student', studentId: PRIMARY_STUDENT_ID, message: 'Updated the self-rating for SQL', createdAt: '2026-10-02T12:00:00.000Z' },
-    { id: id('act'), kind: 'job_viewed', actor: 'student', studentId: PRIMARY_STUDENT_ID, jobId: 'j-ns-frontend', message: 'Viewed “Frontend Engineer” at Northstar Technologies', createdAt: '2026-10-20T08:45:00.000Z' },
     ...reviews.map(r => ({ id: id('act'), kind: 'candidate_reviewed' as const, actor: 'employer' as const, companyId: PRIMARY_COMPANY_ID, studentId: r.studentId, message: `Reviewed ${STUDENTS.find(s => s.id === r.studentId)?.name}`, createdAt: r.reviewedAt })),
     ...shortlists.map(sl => ({ id: id('act'), kind: 'candidate_shortlisted' as const, actor: 'employer' as const, companyId: PRIMARY_COMPANY_ID, studentId: sl.studentId, jobId: sl.jobId, message: `Shortlisted ${STUDENTS.find(s => s.id === sl.studentId)?.name} for ${JOBS.find(j => j.id === sl.jobId)?.title}`, createdAt: sl.createdAt })),
   ]
-
-  // Illustrative history for the primary student's capability chart. These points are not measurements.
-  const HISTORY: Record<string, number[]> = { react: [72, 76, 80, 85, 88, 91], typescript: [61, 66, 72, 79, 84, 88], sql: [52, 55, 60, 66, 71, 76] }
-  const MONTHS = ['2026-05-01', '2026-06-01', '2026-07-01', '2026-08-01', '2026-09-01', '2026-10-01']
-  const skillHistory: SkillSnapshot[] = Object.entries(HISTORY).flatMap(([skillId, values]) =>
-    values.map((proficiency, i) => ({ studentId: PRIMARY_STUDENT_ID, skillId, date: MONTHS[i], proficiency, illustrative: true })),
-  )
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -693,6 +683,6 @@ export function createSeedState(): DemoState {
     students, education, studentSkills, verifications, attempts, projects, projectSkills, projectEvidence, achievements,
     jobs, jobRequirements, shortlists, reviews, notes,
     activity: activity.sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    skillHistory,
+    savedOpportunities: [], dismissedOpportunities: [], savedMissions: [], connectedRepos: [],
   }
 }

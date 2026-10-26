@@ -270,6 +270,16 @@ export type ActivityKind =
   | 'candidate_reviewed'
   | 'note_added'
   | 'demo_reset'
+  | 'live_job_viewed'
+  | 'opportunity_saved'
+  | 'opportunity_unsaved'
+  | 'application_opened'
+  | 'opportunity_dismissed'
+  | 'opportunity_restored'
+  | 'repo_connected'
+  | 'repo_refreshed'
+  | 'mission_saved'
+  | 'mission_unsaved'
 
 export interface ActivityEvent {
   id: ID
@@ -280,15 +290,44 @@ export interface ActivityEvent {
   jobId?: ID
   message: string
   createdAt: string
+  /** What the event refers to, for linking (a live opening, a mission or a connected repository). */
+  ref?: { kind: 'live_job' | 'mission' | 'repo'; id: string; url?: string }
 }
 
-/** A dated proficiency snapshot. Seeded snapshots are illustrative history and are labelled as such in the UI. */
-export interface SkillSnapshot {
-  studentId: ID
-  skillId: ID
-  date: string
-  proficiency: number
-  illustrative: boolean
+/** An opportunity the student saved. Keeps the listing's own details so the saved list survives the listing closing. */
+export interface SavedOpportunity {
+  jobId: string
+  title: string
+  company: string
+  sourceLabel: string
+  savedAt: string
+}
+
+export interface DismissedOpportunity {
+  jobId: string
+  at: string
+}
+
+/** An open-source issue the student saved from Open-source missions. Not a job and not project evidence. */
+export interface SavedMission {
+  id: string
+  repo: string
+  title: string
+  url: string
+  savedAt: string
+}
+
+/** Read-only public metadata for a GitHub repository the student linked to a project. Not a verification. */
+export interface ConnectedRepo {
+  projectId: ID
+  fullName: string
+  url: string
+  description: string | null
+  language: string | null
+  languages: Record<string, number>
+  pushedAt: string | null
+  stars: number
+  fetchedAt: string
 }
 
 export interface DemoState {
@@ -311,5 +350,8 @@ export interface DemoState {
   reviews: CandidateReview[]
   notes: EmployerNote[]
   activity: ActivityEvent[]
-  skillHistory: SkillSnapshot[]
+  savedOpportunities: SavedOpportunity[]
+  dismissedOpportunities: DismissedOpportunity[]
+  savedMissions: SavedMission[]
+  connectedRepos: ConnectedRepo[]
 }

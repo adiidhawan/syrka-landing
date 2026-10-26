@@ -4,6 +4,9 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ClipboardCheck, FolderKanban, Plus, Search, Sparkles } from 'lucide-react'
 import AssessmentRunner from '@/components/campus/AssessmentRunner'
+import ExploreOpenWork from '@/components/campus/ExploreOpenWork'
+import { SkillsInDemand } from '@/components/campus/MarketDemand'
+import type { MarketDemandState } from '@/lib/campus/external.server'
 import { Card, clearQuery, ConfirmButton, Dialog, EmptyState, EvidenceBadge, Field, Flash, Meter, PageHeader, Tag, Time, useFlash, VerificationBadge } from '@/components/campus/ui'
 import { ASSESSMENTS, getAssessment } from '@/lib/campus/assessments'
 import { resolveSkillId } from '@/lib/campus/matching'
@@ -120,7 +123,7 @@ function SkillDrawer({ skill, onClose, onAssess }: { skill: SkillView | null; on
   )
 }
 
-export default function SkillsView({ initialAssess, initialAdd }: { initialAssess?: string; initialAdd?: string }) {
+export default function SkillsView({ initialAssess, initialAdd, market }: { initialAssess?: string; initialAdd?: string; market: MarketDemandState }) {
   const state = useDemoState()
   const skills = skillsFor(state, PRIMARY_STUDENT_ID)
   const [query, setQuery] = useState('')
@@ -229,6 +232,17 @@ export default function SkillsView({ initialAssess, initialAdd }: { initialAsses
           </Card>
         </div>
       </div>
+
+      <section aria-label="Market signals" className="mt-8">
+        <div className="mb-3">
+          <div className="cx-eyebrow">External market signals</div>
+          <p className="mt-1 text-[13px] text-cx-dim">Separate from your own skill records above, which these signals never change.</p>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <SkillsInDemand market={market} />
+          <ExploreOpenWork />
+        </div>
+      </section>
 
       <SkillDrawer key={openSkillId ?? 'none'} skill={openSkill} onClose={() => setOpenSkillId(null)} onAssess={startAssessment} />
       {adding && <AddSkillDialog open initialName={initialAdd ?? ''} onClose={() => { setAdding(false); clearQuery() }} onAdded={n => { setAdding(false); clearQuery(); show(`${n} added as self-reported`) }} />}

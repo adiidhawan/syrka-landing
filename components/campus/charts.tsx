@@ -12,7 +12,7 @@ import { cn } from './ui'
 export interface BarDatum { key: string; label: string; value: number; secondary?: number; note?: string }
 
 /** Ranked horizontal bars. `secondary` draws an inner portion (e.g. the verified share of a count). */
-export function BarList({ data, max, unit = '', secondaryLabel, caption }: { data: BarDatum[]; max?: number; unit?: string; secondaryLabel?: string; caption: string }) {
+export function BarList({ data, max, unit = '', secondaryLabel, totalLabel = 'Total', caption }: { data: BarDatum[]; max?: number; unit?: string; secondaryLabel?: string; totalLabel?: string; caption: string }) {
   const [hover, setHover] = useState<string | null>(null)
   const top = max ?? Math.max(1, ...data.map(d => d.value))
   if (!data.length) return <p className="py-6 text-center text-[13px] text-cx-dim">No data yet.</p>
@@ -38,7 +38,7 @@ export function BarList({ data, max, unit = '', secondaryLabel, caption }: { dat
       {secondaryLabel && (
         <figcaption className="mt-3 flex items-center gap-4 text-[11.5px] text-cx-dim">
           <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm" style={{ background: 'var(--cx-accent)' }} />{secondaryLabel}</span>
-          <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm" style={{ background: 'var(--cx-accent)', opacity: 0.35 }} />Total</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm" style={{ background: 'var(--cx-accent)', opacity: 0.35 }} />{totalLabel}</span>
         </figcaption>
       )}
       <table className="sr-only">
