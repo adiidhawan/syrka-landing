@@ -6,15 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:campus": "node --test --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/campus/*.test.mjs"
   },
   "dependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.11",
+    "lucide-react": "^1.7.0",
     "next": "^16.3.6",
     "ogl": "^1.0.11",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "@tailwindcss/container-queries": "^0.1.1",
-    "@tailwindcss/forms": "^0.5.11"
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@types/node": "^20",
