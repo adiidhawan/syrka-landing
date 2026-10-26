@@ -16,6 +16,15 @@ export function ConfidenceTag({ match }: { match: MatchResult }) {
 
 /** Score, confidence and the per-component points that add up to it. */
 export function ScoreComponents({ match }: { match: MatchResult }) {
+  if (match.status !== 'ok') {
+    return (
+      <div className="rounded-[10px] bg-cx-sunken p-4 text-[13px]">
+        <div className="font-medium text-cx-ink">{match.status === 'limited_detail' ? 'Limited source detail' : 'No requirements listed'}</div>
+        <p className="mt-1 text-cx-ink2">{match.confidenceNote}</p>
+        <p className="mt-1 text-[12px] text-cx-dim">No alignment score is shown, because one based on so little would look more certain than it is.</p>
+      </div>
+    )
+  }
   return (
     <div>
       <div className="flex items-center gap-4">

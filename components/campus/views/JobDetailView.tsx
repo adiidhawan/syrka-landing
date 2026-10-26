@@ -50,7 +50,7 @@ export default function JobDetailView({ id }: { id: string }) {
             Evidence considered: {job.evidencePolicy.projects ? 'projects' : ''}{job.evidencePolicy.projects && job.evidencePolicy.assessments ? ' and ' : ''}{job.evidencePolicy.assessments ? 'verified assessments' : ''}.
             {!reqs.preferred.length && ' No preferred skills, so the 20% preferred weight is spread over the other components.'}
             {job.calibration
-              ? ` Skills derived from ${job.calibration.postings} real Indian postings for similar roles (${job.calibration.date}); levels set by Northstar.`
+              ? ` Skills derived from ${job.calibration.postings} real postings for similar roles open to candidates in India (${job.calibration.date}); levels set by Northstar.`
               : ' Skills written by hand: too few real postings to derive them.'}
           </p>
         </Card>

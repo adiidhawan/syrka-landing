@@ -1,5 +1,5 @@
 import { ASSESSMENTS } from './assessments'
-import { INFERRED_LEVELS, LIVE_SKILL_NAMES, type LiveJob } from './live-jobs'
+import { ASSUMED_LEVELS, LIVE_SKILL_NAMES, MIN_STATED_SKILLS, type LiveJob } from './live-jobs'
 import { calculateCandidateMatch, type CandidateInput, type JobRequirementsInput, type MatchResult } from './matching'
 import type {
   Achievement, Company, DemoState, EducationRecord, EvidenceType, Job, Project, ProjectEvidence, Skill, Student,
@@ -101,14 +101,22 @@ export function studentMatch(state: DemoState, studentId: string, jobId: string)
   return calculateCandidateMatch(candidateInputFrom(skillsFor(state, studentId), projectsFor(state, studentId)), jobRequirements(state, jobId), { assessableSkillIds: ASSESSABLE })
 }
 
-/** A student's match against a real posting. Requirements are the inferred skills at the assumed demo levels. */
+/**
+ * A student's match against a live opening. Only skills the posting states under its own requirement headings are
+ * scored, at the assumed levels; skills merely mentioned in the prose are not. Too few stated skills gives
+ * 'limited_detail' instead of a score, and confidence is capped because the mapping comes from text.
+ */
 export function liveMatch(state: DemoState, studentId: string, job: LiveJob): MatchResult {
-  const toReq = (level: number) => (id: string) => ({ skillId: id, name: skillById(state, id)?.name ?? LIVE_SKILL_NAMES[id] ?? id, minProficiency: level })
+  const toReq = (level: number) => (id: string) => ({ skillId: id, name: liveSkillName(state, id), minProficiency: level })
   return calculateCandidateMatch(
     candidateInputFrom(skillsFor(state, studentId), projectsFor(state, studentId)),
-    { required: job.required.map(toReq(INFERRED_LEVELS.required)), preferred: job.preferred.map(toReq(INFERRED_LEVELS.preferred)) },
-    { assessableSkillIds: ASSESSABLE },
+    { required: job.required.map(toReq(ASSUMED_LEVELS.required)), preferred: job.preferred.map(toReq(ASSUMED_LEVELS.preferred)) },
+    { assessableSkillIds: ASSESSABLE, minRequirements: MIN_STATED_SKILLS, requirementsFromText: true },
   )
+}
+
+export function liveSkillName(state: DemoState, id: string): string {
+  return skillById(state, id)?.name ?? LIVE_SKILL_NAMES[id] ?? id
 }
 
 export function studentJobMatches(state: DemoState, studentId: string) {

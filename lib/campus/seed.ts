@@ -14,7 +14,7 @@ import type { RoleFamily } from './live-jobs'
  */
 
 // Bump when the seed changes shape or content, so browsers holding an older copy start again from this seed.
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 export const PRIMARY_STUDENT_ID = 's-aarav'
 export const PRIMARY_COMPANY_ID = 'c-northstar'
 
@@ -444,13 +444,16 @@ interface JobSpec extends Omit<Job, 'evidencePolicy' | 'status' | 'calibration'>
 }
 
 /** Fewest postings a calibration needs before it replaces the hand-written requirements. */
-export const MIN_CALIBRATION_POSTINGS = 8
+export const MIN_CALIBRATION_POSTINGS = 15
+/** Fewest required skills a derived set must have; a thinner set says more about the sample than the role. */
+export const MIN_DERIVED_REQUIRED = 2
 
 /**
  * Turns real-posting skill shares into job requirements, mechanically: up to `maxRequired` (default 3) skills that
  * appear in at least half of the postings become required; the next up to 3 skills that appear in at least 30%
  * become preferred. Shares from several families are pooled, weighted by their number of postings. Returns null
- * when fewer than MIN_CALIBRATION_POSTINGS postings back the families, so thin samples never set requirements.
+ * when fewer than MIN_CALIBRATION_POSTINGS postings back the families, or fewer than MIN_DERIVED_REQUIRED skills
+ * qualify as required, so thin samples never set requirements.
  */
 export function deriveRequirements(families: RoleFamily[], maxRequired = 3) {
   const present = families.map(f => CALIBRATION[f]).filter(c => c !== undefined)
@@ -461,6 +464,7 @@ export function deriveRequirements(families: RoleFamily[], maxRequired = 3) {
   const ranked = [...pooled.entries()].map(([skillId, n]) => ({ skillId, share: n / postings })).sort((a, b) => b.share - a.share || a.skillId.localeCompare(b.skillId))
   const required = ranked.filter(r => r.share >= 0.5).slice(0, maxRequired)
   const preferred = ranked.filter(r => !required.includes(r) && r.share >= 0.3).slice(0, 3)
+  if (required.length < MIN_DERIVED_REQUIRED) return null
   // Company counts cannot be pooled (one company can post in several families), so they are kept for one family only.
   return { required, preferred, postings, companies: present.length === 1 ? present[0].companies : undefined }
 }

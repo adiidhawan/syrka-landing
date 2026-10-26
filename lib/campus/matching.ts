@@ -38,6 +38,9 @@ import type { EvidenceType, VerificationStatus } from './types'
  * - The engine sees only skills, proficiency, evidence and projects. University, CGPA, name, location and any
  *   personal or sensitive attribute are not inputs, so they cannot affect the result.
  *
+ * - With `minRequirements`, a source that states fewer requirements gets 'limited_detail' instead of a score, and
+ *   with `requirementsFromText` (requirements mapped from prose by keyword) confidence is capped at medium.
+ *
  * The weights are initial demo assumptions, not validated hiring criteria. The score measures how well a profile
  * aligns with a job's stated requirements; it is not a probability of success in the role.
  */
@@ -84,6 +87,14 @@ export interface JobRequirementsInput {
 export interface MatchOptions {
   /** Skill ids that have an in-app sample assessment, so improvements can point to it. */
   assessableSkillIds?: string[]
+  /**
+   * Fewest requirements needed for a score. Below it the result is 'limited_detail': too little source detail to
+   * compare against, which is reported instead of a score that would look better than the evidence allows.
+   */
+  minRequirements?: number
+  /** True when requirements were mapped from free text by keyword rather than given as structured data. Caps
+   *  confidence at medium. */
+  requirementsFromText?: boolean
 }
 
 export type RequirementStatus = 'met' | 'partial' | 'missing'
@@ -127,7 +138,7 @@ export interface Improvement {
 }
 
 export interface MatchResult {
-  status: 'ok' | 'no_requirements'
+  status: 'ok' | 'no_requirements' | 'limited_detail'
   score: number
   components: ComponentResult[]
   required: RequirementResult[]
@@ -265,6 +276,17 @@ export function calculateCandidateMatch(candidate: CandidateInput, job: JobRequi
     preferredTotal: preferred.length,
   }
 
+  if ((required.length || preferred.length) && required.length + preferred.length < (options.minRequirements ?? 0)) {
+    return {
+      status: 'limited_detail', score: 0, components, required, preferred, summary,
+      projectEvidence: [], assessmentEvidence: [], confidence: 'low',
+      confidenceNote: `The source lists only ${required.length + preferred.length} skill requirement${required.length + preferred.length === 1 ? '' : 's'}, fewer than the ${options.minRequirements} needed for a meaningful comparison.`,
+      improvements: [],
+      explanation: ['Limited source detail: too few stated requirements to calculate an alignment score. The requirements that are stated are listed for reference.'],
+      limitations: MATCH_LIMITATIONS,
+    }
+  }
+
   if (!required.length && !preferred.length) {
     return {
       status: 'no_requirements', score: 0, components, required, preferred, summary,
@@ -293,10 +315,12 @@ export function calculateCandidateMatch(candidate: CandidateInput, job: JobRequi
   const evidenced = evidenceBase.filter(r => r.proficiency !== null && (r.externallyVerified || r.projects.length > 0))
   const absent = evidenceBase.filter(r => r.proficiency === null)
   const share = evidenceBase.length ? evidenced.length / evidenceBase.length : 0
-  const confidence = share >= 0.67 ? 'high' : share >= 0.34 ? 'medium' : 'low'
+  const evidenceConfidence = share >= 0.67 ? 'high' : share >= 0.34 ? 'medium' : 'low'
+  const confidence = options.requirementsFromText && evidenceConfidence === 'high' ? 'medium' : evidenceConfidence
   const notes = [`${evidenced.length} of ${evidenceBase.length} ${required.length ? 'required' : 'listed'} skills are backed by a project or a verification, not only a self-rating.`]
   const selfOnly = evidenceBase.filter(r => r.proficiency !== null && !r.externallyVerified && !r.projects.length)
   if (selfOnly.length) notes.push(`${selfOnly.map(r => r.name).join(', ')} ${selfOnly.length === 1 ? 'rests' : 'rest'} on self-reported ratings, which makes the score less certain.`)
+  if (options.requirementsFromText) notes.push('The requirements were mapped from the posting text by keyword, not supplied as structured data, so confidence is capped at medium.')
   if (absent.length) notes.push(`${absent.map(r => r.name).join(', ')} ${absent.length === 1 ? 'is' : 'are'} not on the profile. That is missing information, not evidence the skill is absent.`)
 
   const improvements: Improvement[] = []

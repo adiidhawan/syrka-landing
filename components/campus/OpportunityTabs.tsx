@@ -13,10 +13,10 @@ export default function OpportunityTabs() {
   return (
     <div className="mb-5 inline-flex gap-0.5 rounded-[9px] bg-cx-sunken p-0.5" role="tablist" aria-label="Opportunity source">
       <Link href="/demo/student/opportunities" role="tab" aria-selected={!live} className={cn(tab, !live ? 'bg-cx-surface text-cx-ink shadow-sm' : 'text-cx-dim hover:text-cx-ink')}>
-        Demo roles
+        Illustrative demo roles
       </Link>
       <Link href="/demo/student/opportunities/live" role="tab" aria-selected={live} className={cn(tab, live ? 'bg-cx-surface text-cx-ink shadow-sm' : 'text-cx-dim hover:text-cx-ink')}>
-        <Radio size={13} className="text-cx-ok" aria-hidden />Live openings
+        <Radio size={13} className="text-cx-ok" aria-hidden />Live external openings
       </Link>
     </div>
   )

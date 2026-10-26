@@ -41,7 +41,7 @@ export default function OpportunityDetailView({ id }: { id: string }) {
           <ul className="list-disc space-y-1 pl-5 text-[13px] text-cx-ink2">{job.responsibilities.map(r => <li key={r}>{r}</li>)}</ul>
           <h3 className="cx-eyebrow mb-1.5 mt-4">Experience</h3>
           <p className="text-[13px] text-cx-ink2">{job.experience}</p>
-          {job.calibration && <p className="mt-4 text-[12px] text-cx-dim">Skill requirements derived from {job.calibration.postings} real postings for similar roles{job.calibration.companies ? ` at ${job.calibration.companies} companies` : ''} in India (<Time iso={job.calibration.date} />).</p>}
+          {job.calibration && <p className="mt-4 text-[12px] text-cx-dim">Skill requirements derived from {job.calibration.postings} real postings for similar roles open to candidates in India (<Time iso={job.calibration.date} />).</p>}
           {org && <div className="mt-4 flex items-start gap-2 border-t border-cx-line pt-4 text-[12.5px] text-cx-dim"><Building2 size={14} className="mt-0.5 shrink-0" aria-hidden /><span><span className="font-medium text-cx-ink">{org.name}</span> · {org.industry}. {org.about} <Tag>Fictional company</Tag></span></div>}
         </Card>
       </div>

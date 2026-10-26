@@ -34,7 +34,7 @@ export default function OpportunitiesView({ initialQuery = '' }: { initialQuery?
     <>
       <PageHeader eyebrow="Opportunities" title="Recommended jobs and internships" description="Every percentage is requirement alignment: how your profile compares with what the job lists. It is not a chance of being hired." />
       <OpportunityTabs />
-      <p className="mb-4 text-[12.5px] text-cx-dim">Demo roles are at fictional companies. Their skill requirements are derived from real Indian job postings for the same kind of role.</p>
+      <p className="mb-4 text-[12.5px] text-cx-dim">Illustrative roles at fictional companies, not current openings. Most of their skill requirements are derived from real postings open to candidates in India for the same kind of role.</p>
 
       <div className="cx-card mb-4 grid grid-cols-2 gap-2 p-3 sm:flex sm:flex-wrap">
         <div className="relative col-span-2 min-w-[200px] flex-1">
@@ -54,7 +54,7 @@ export default function OpportunitiesView({ initialQuery = '' }: { initialQuery?
             <li key={job.id} className="cx-card flex flex-col p-5">
               <div className="flex items-start gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="text-[12.5px] text-cx-dim">{company.name}</div>
+                  <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-cx-dim">{company.name}<Tag>Illustrative</Tag></div>
                   <Link href={`/demo/student/opportunities/${job.id}`} className="mt-0.5 block text-[16px] font-semibold text-cx-ink no-underline hover:underline">{job.title}</Link>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 text-[12.5px] text-cx-dim">
                     <span className="inline-flex items-center gap-1"><MapPin size={12} aria-hidden />{job.location} · {job.arrangement}</span>
