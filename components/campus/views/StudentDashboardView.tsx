@@ -44,7 +44,7 @@ export default function StudentDashboardView({ market, landscape }: { market: Ma
         <Card
           title="Illustrative demo roles"
           description="Fictional roles, not current openings, scored by the same engine employers use."
-          action={<Link href="/demo/student/opportunities/live" className="text-[12.5px] font-medium text-cx-accent-ink">Live external openings →</Link>}
+          action={<Link href="/demo/student/opportunities/live" className="text-[12.5px] font-medium text-cx-accent-ink">Real job openings →</Link>}
           padded={false}
         >
           <ul>

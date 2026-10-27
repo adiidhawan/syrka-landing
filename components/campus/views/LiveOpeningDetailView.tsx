@@ -6,7 +6,7 @@ import { ArrowLeft, Briefcase, MapPin, TriangleAlert } from 'lucide-react'
 import { EvidenceSummary, Explanation, Improvements, Limitations, MatchActions, RequirementList, ScoreComponents } from '@/components/campus/MatchBreakdown'
 import { Card, PageHeader, Time } from '@/components/campus/ui'
 import { ASSUMED_LEVELS, FAMILY_LABEL, HIMALAYAS_HOME, isSeniorTitle, type LiveJob } from '@/lib/campus/live-jobs'
-import { liveMatch, liveSkillName } from '@/lib/campus/queries'
+import { liveMatch } from '@/lib/campus/queries'
 import { PRIMARY_STUDENT_ID } from '@/lib/campus/seed'
 import { recordLiveView, useDemoState, useHydrated } from '@/lib/campus/store'
 import { ExperienceTag, LiveJobActions, SourceLine } from './LiveOpeningsView'
@@ -21,7 +21,7 @@ export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { j
     <>
       <Link href="/demo/student/opportunities/live" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-cx-dim no-underline hover:text-cx-ink"><ArrowLeft size={14} aria-hidden />All live openings</Link>
       <PageHeader
-        eyebrow={`${job.company} · live external opening`}
+        eyebrow={`${job.company} · real opening`}
         title={job.title}
         description={<span className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="inline-flex items-center gap-1"><MapPin size={13} aria-hidden />{job.location}</span>
@@ -30,7 +30,7 @@ export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { j
           {job.expiresAt && <span>Closes by <Time iso={job.expiresAt} /></span>}
         </span>}
         actions={<>
-          <LiveJobActions job={job} primaryApply />
+          <LiveJobActions job={job} large />
           {match.status === 'ok' && <MatchActions match={match} perspective="student" />}
         </>}
       />
@@ -44,7 +44,7 @@ export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { j
       )}
 
       <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-        <Card title="Your requirement alignment" description="Against the skills this posting lists under its own requirement headings.">
+        <Card title="How well you match" description="Against the skills this posting mentions.">
           <ScoreComponents match={match} />
         </Card>
         <Card title="About this data">
@@ -53,15 +53,9 @@ export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { j
             <p>
               {job.source === 'himalayas'
                 ? <>Listed on <a href={HIMALAYAS_HOME} target="_blank" rel="noreferrer noopener" className="text-cx-accent-ink underline underline-offset-2">Himalayas</a>. The full description, pay and application are there.</>
-                : <>From {job.company}’s own careers page, shared with SYRKA as a partner employer.</>}
+                : <>From {job.company}’s own careers page. The full description, pay and application are there.</>}
             </p>
-            <p>Skills are mapped to the SYRKA catalogue by keyword. Only those listed under the posting’s requirement or nice-to-have headings are scored, at an assumed {ASSUMED_LEVELS.required} (required) or {ASSUMED_LEVELS.preferred} (preferred), because postings rarely state levels.</p>
-            {job.extracted.length > 0 && (
-              <div>
-                <div className="mb-1 text-[12px] font-medium text-cx-ink">Also mentioned in the description (not scored)</div>
-                <div className="flex flex-wrap gap-1">{job.extracted.map(id => <span key={id} className="cx-chip border-dashed text-cx-dim" style={{ borderColor: 'var(--cx-line-strong)' }}>{liveSkillName(state, id)}</span>)}</div>
-              </div>
-            )}
+            <p>Skills are read from the posting by keyword. Postings rarely state skill levels, so a level of {ASSUMED_LEVELS.required} is assumed ({ASSUMED_LEVELS.preferred} for nice-to-have skills). Treat the match as a guide.</p>
             <p className="text-[12px] text-cx-dim">SYRKA is not affiliated with {job.company}. Your profile is never sent to the source; matching happens inside SYRKA.</p>
           </div>
         </Card>
@@ -69,10 +63,10 @@ export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { j
 
       {match.status === 'ok' ? (
         <>
-          <div className="mt-4"><Card title="Stated requirements" description="Your proficiency against the assumed level (the tick marks it)."><RequirementList match={match} /></Card></div>
+          <div className="mt-4"><Card title="Skills this role asks for" description="Your level against the assumed level (the tick marks it)."><RequirementList match={match} /></Card></div>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <Card title="Evidence behind the match"><EvidenceSummary match={match} /></Card>
-            <Card title="How can I improve my match?" description="Generated from the stated requirements that are missing, below level or not yet evidenced."><Improvements match={match} perspective="student" /></Card>
+            <Card title="How can I improve my match?" description="From the skills that are missing, below level or not yet evidenced."><Improvements match={match} perspective="student" /></Card>
           </div>
           <div className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
             <Card title="Why this match?"><Explanation match={match} /></Card>
@@ -80,7 +74,7 @@ export default function LiveOpeningDetailView({ job, verifiedAt, verified }: { j
           </div>
         </>
       ) : match.required.length + match.preferred.length > 0 && (
-        <div className="mt-4"><Card title="Stated requirements" description="Listed for reference; too few to score."><RequirementList match={match} /></Card></div>
+        <div className="mt-4"><Card title="Skills this role asks for" description="Too few to calculate a match."><RequirementList match={match} /></Card></div>
       )}
     </>
   )

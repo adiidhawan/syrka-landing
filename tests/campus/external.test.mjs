@@ -30,6 +30,7 @@ test('O*NET attribution carries the exact required wording', () => {
   assert.ok(onet.attribution.startsWith(ONET_ATTRIBUTION))
   assert.match(onet.neverUsedFor, /evidence/)
   assert.match(DATA_SOURCES.find(s => s.key === 'himalayas').attribution, /Himalayas/)
+  assert.match(DATA_SOURCES.find(s => s.key === 'company_boards').attribution, /original posting/)
   assert.match(DATA_SOURCES.find(s => s.key === 'github').attribution, /Source: GitHub/)
   assert.match(DATA_SOURCES.find(s => s.key === 'openalex').attribution, /Source: OpenAlex/)
 })

@@ -7,7 +7,7 @@
  * student's skill, verification, project evidence, assessment result or capability score.
  */
 
-export type SourceKey = 'himalayas' | 'partner_boards' | 'github' | 'openalex' | 'onet' | 'worldbank'
+export type SourceKey = 'company_boards' | 'himalayas' | 'github' | 'openalex' | 'onet' | 'worldbank'
 
 export interface DataSource {
   key: SourceKey
@@ -30,32 +30,35 @@ export const ONET_ATTRIBUTION =
 
 export const DATA_SOURCES: DataSource[] = [
   {
+    key: 'company_boards',
+    name: 'Company careers pages',
+    homepage: 'https://docs.greenhouse.io/job-board.html',
+    usedFor: 'Real job openings in India and the market-demand figures computed from them, read from the public job-board feeds (Greenhouse, Lever, Ashby) behind each company’s careers page.',
+    licence: 'Public job-board APIs published by each company’s applicant-tracking system',
+    licenceUrl: 'https://docs.greenhouse.io/job-board.html',
+    attribution: 'Each opening names its company and links to the original posting; students apply on the company’s own site.',
+    refresh: 'Cached for up to 12 hours; daily demand snapshot taken by the scheduled refresh.',
+    env: [
+      { name: 'CAMPUS_COMPANY_BOARDS', purpose: 'Override the company list, e.g. "greenhouse:groww:Groww,lever:meesho:Meesho". Defaults to the list in lib/campus/live-jobs.ts.' },
+      { name: 'CAMPUS_LIVE_JOBS', purpose: 'Set to "off" to hide real openings (illustrative roles are shown instead).' },
+      { name: 'CAMPUS_LIVE_MAX_AGE_HOURS', purpose: 'Hide openings data older than this (default 36).' },
+    ],
+    neverUsedFor: 'Copying job descriptions, or any personal metric about a student.',
+  },
+  {
     key: 'himalayas',
-    name: 'Himalayas',
+    name: 'Himalayas (optional)',
     homepage: 'https://himalayas.app',
-    usedFor: 'Live external openings: remote, entry-level roles open to candidates in India, and the live market-demand figures computed from them.',
+    usedFor: 'Optional extra source of remote roles open to candidates in India. Off unless CAMPUS_HIMALAYAS=on.',
     licence: 'Himalayas API terms (display in own app permitted, including commercial use)',
     licenceUrl: 'https://himalayas.app/terms',
     attribution: 'Jobs sourced from Himalayas (himalayas.app). Applications go through Himalayas.',
-    refresh: 'Listing data cached for up to 12 hours; each listing re-checked before it is opened or applied to; demand snapshot taken daily by the scheduled refresh.',
+    refresh: 'With real openings; each Himalayas listing re-checked before it is opened or applied to.',
     env: [
+      { name: 'CAMPUS_HIMALAYAS', purpose: 'Set to "on" to include Himalayas.' },
       { name: 'HIMALAYAS_API_KEY', purpose: 'Raises rate limits. Server-side only.' },
-      { name: 'CAMPUS_LIVE_JOBS', purpose: 'Set to "off" to hide live openings (e.g. an investor environment).' },
-      { name: 'CAMPUS_LIVE_MAX_AGE_HOURS', purpose: 'Hide live data older than this (default 36).' },
     ],
     neverUsedFor: 'Re-publication to other boards, aggregators, Google Jobs or LinkedIn; any personal metric.',
-  },
-  {
-    key: 'partner_boards',
-    name: 'Partner employer job boards',
-    homepage: 'https://docs.greenhouse.io/job-board.html',
-    usedFor: 'Openings from employers who have agreed in writing to be listed. Off unless configured.',
-    licence: 'Written agreement with each employer',
-    licenceUrl: 'https://docs.greenhouse.io/job-board.html',
-    attribution: '"<Company> careers (partner)" on each listing.',
-    refresh: 'With live openings (up to 12 hours).',
-    env: [{ name: 'CAMPUS_PARTNER_BOARDS', purpose: 'Allow-list, e.g. "greenhouse:groww:Groww". Empty by default.' }],
-    neverUsedFor: 'Any employer that has not agreed in writing.',
   },
   {
     key: 'github',

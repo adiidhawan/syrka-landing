@@ -102,15 +102,15 @@ export function studentMatch(state: DemoState, studentId: string, jobId: string)
 }
 
 /**
- * A student's match against a live opening. Only skills the posting states under its own requirement headings are
- * scored, at the assumed levels; skills merely mentioned in the prose are not. Too few stated skills gives
- * 'limited_detail' instead of a score, and confidence is capped because the mapping comes from text.
+ * A student's match against a live opening. Every catalogue skill the posting mentions is scored at the assumed
+ * levels: those under its nice-to-have headings as preferred, the rest as required. Confidence is capped because the
+ * requirements are mapped from text.
  */
 export function liveMatch(state: DemoState, studentId: string, job: LiveJob): MatchResult {
   const toReq = (level: number) => (id: string) => ({ skillId: id, name: liveSkillName(state, id), minProficiency: level })
   return calculateCandidateMatch(
     candidateInputFrom(skillsFor(state, studentId), projectsFor(state, studentId)),
-    { required: job.required.map(toReq(ASSUMED_LEVELS.required)), preferred: job.preferred.map(toReq(ASSUMED_LEVELS.preferred)) },
+    { required: [...job.required, ...job.extracted].map(toReq(ASSUMED_LEVELS.required)), preferred: job.preferred.map(toReq(ASSUMED_LEVELS.preferred)) },
     { assessableSkillIds: ASSESSABLE, minRequirements: MIN_STATED_SKILLS, requirementsFromText: true },
   )
 }

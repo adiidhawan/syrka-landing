@@ -4,9 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Bookmark, BookmarkCheck, Briefcase, Clock, ExternalLink, EyeOff, Info, MapPin, Search, Undo2, WifiOff } from 'lucide-react'
 import OpportunityTabs from '@/components/campus/OpportunityTabs'
-import { ConfidenceTag } from '@/components/campus/MatchBreakdown'
 import { EmptyState, PageHeader, ScoreBadge, Tag, Time } from '@/components/campus/ui'
-import { ASSUMED_LEVELS, FAMILY_LABEL, HIMALAYAS_HOME, isSeniorTitle, type LiveJob, type RoleFamily } from '@/lib/campus/live-jobs'
+import { FAMILY_LABEL, HIMALAYAS_HOME, isSeniorTitle, type LiveJob, type RoleFamily } from '@/lib/campus/live-jobs'
 import type { LiveState } from '@/lib/campus/live-jobs.server'
 import type { MatchResult } from '@/lib/campus/matching'
 import { liveMatch, liveSkillName, studentJobMatches } from '@/lib/campus/queries'
@@ -15,30 +14,31 @@ import { recordApplicationOpened, setOpportunityDismissed, toggleSavedOpportunit
 
 const PAGE = 24
 
+/** Careers-page jobs link straight to the company's posting; Himalayas jobs go through its closure check first. */
 export function applyHref(job: LiveJob) {
-  return `/demo/student/opportunities/live/${job.id}/apply`
+  return job.source === 'himalayas' ? `/demo/student/opportunities/live/${job.id}/apply` : job.applyUrl
 }
 
 export function applyLabel(job: LiveJob) {
   return `Apply on ${job.source === 'himalayas' ? 'Himalayas' : job.company}`
 }
 
-/** Save, not interested and apply — each recorded as a real interaction in the student's activity. */
-export function LiveJobActions({ job, primaryApply = false }: { job: LiveJob; primaryApply?: boolean }) {
+/** One clear Apply button, plus small save and not-interested controls. Each is recorded in the student's activity. */
+export function LiveJobActions({ job, large = false }: { job: LiveJob; large?: boolean }) {
   const state = useDemoState()
   const saved = state.savedOpportunities.some(o => o.jobId === job.id)
   const dismissed = state.dismissedOpportunities.some(o => o.jobId === job.id)
-  const size = primaryApply ? '' : 'cx-btn-sm'
+  const size = large ? '' : 'cx-btn-sm'
   return (
     <>
-      <a href={applyHref(job)} target="_blank" rel="noreferrer noopener" onClick={() => recordApplicationOpened(PRIMARY_STUDENT_ID, job)} className={`cx-btn ${size} ${primaryApply ? 'cx-btn-primary' : ''}`}>
+      <a href={applyHref(job)} target="_blank" rel="noreferrer noopener" onClick={() => recordApplicationOpened(PRIMARY_STUDENT_ID, job)} className={`cx-btn cx-btn-primary ${size}`}>
         {applyLabel(job)} <ExternalLink size={12} aria-hidden />
       </a>
-      <button className={`cx-btn ${size} ${saved ? 'cx-btn-accent' : ''}`} aria-pressed={saved} onClick={() => toggleSavedOpportunity(PRIMARY_STUDENT_ID, job)}>
-        {saved ? <BookmarkCheck size={13} aria-hidden /> : <Bookmark size={13} aria-hidden />}{saved ? 'Saved' : 'Save'}
+      <button className={`cx-btn cx-btn-ghost ${size} ${saved ? 'text-cx-accent-ink' : ''}`} aria-pressed={saved} aria-label={saved ? 'Remove from saved' : 'Save'} title={saved ? 'Saved' : 'Save'} onClick={() => toggleSavedOpportunity(PRIMARY_STUDENT_ID, job)}>
+        {saved ? <BookmarkCheck size={14} aria-hidden /> : <Bookmark size={14} aria-hidden />}{large && (saved ? 'Saved' : 'Save')}
       </button>
-      <button className={`cx-btn cx-btn-ghost ${size}`} onClick={() => setOpportunityDismissed(PRIMARY_STUDENT_ID, job, !dismissed)}>
-        {dismissed ? <><Undo2 size={13} aria-hidden />Restore</> : <><EyeOff size={13} aria-hidden />Not interested</>}
+      <button className={`cx-btn cx-btn-ghost ${size}`} aria-label={dismissed ? 'Restore' : 'Not interested'} title={dismissed ? 'Restore' : 'Not interested'} onClick={() => setOpportunityDismissed(PRIMARY_STUDENT_ID, job, !dismissed)}>
+        {dismissed ? <Undo2 size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}{large && (dismissed ? 'Restore' : 'Not interested')}
       </button>
     </>
   )
@@ -54,17 +54,13 @@ export function ExperienceTag({ job }: { job: LiveJob }) {
   return <Tag><Clock size={11} aria-hidden />Experience not stated</Tag>
 }
 
-/** Stated skills coloured by how the student meets them; extracted ones dashed and marked as not scored. */
-export function SkillChips({ job, match, limit = 3 }: { job: LiveJob; match: MatchResult; limit?: number }) {
-  const state = useDemoState()
+/** The posting's skills, coloured by how the student meets them. */
+export function SkillChips({ match, limit = 6 }: { match: MatchResult; limit?: number }) {
+  const all = [...match.required, ...match.preferred]
   return (
     <div className="flex flex-wrap gap-1">
-      {match.required.map(r => <Tag key={r.skillId} tone={r.status === 'met' ? 'ok' : r.status === 'partial' ? 'warn' : 'neutral'}>{r.name}</Tag>)}
-      {match.preferred.map(r => <Tag key={r.skillId}>{r.name} · preferred</Tag>)}
-      {job.extracted.slice(0, limit).map(id => (
-        <span key={id} className="cx-chip border-dashed text-cx-dim" style={{ borderColor: 'var(--cx-line-strong)' }} title="Mentioned in the description, not under its requirements. Not scored.">{liveSkillName(state, id)} · extracted</span>
-      ))}
-      {job.extracted.length > limit && <span className="cx-chip text-cx-dim">+{job.extracted.length - limit} extracted</span>}
+      {all.slice(0, limit).map(r => <Tag key={r.skillId} tone={r.status === 'met' ? 'ok' : r.status === 'partial' ? 'warn' : 'neutral'}>{r.name}{r.kind === 'preferred' ? ' · nice to have' : ''}</Tag>)}
+      {all.length > limit && <span className="cx-chip text-cx-dim">+{all.length - limit} more</span>}
     </div>
   )
 }
@@ -72,7 +68,7 @@ export function SkillChips({ job, match, limit = 3 }: { job: LiveJob; match: Mat
 export function SourceLine({ job, seenAt, verb = 'seen' }: { job: LiveJob; seenAt: string; verb?: string }) {
   return (
     <span className="text-[12px] text-cx-dim">
-      <a href={job.source === 'himalayas' ? HIMALAYAS_HOME : job.sourceHome} target="_blank" rel="noreferrer noopener" className="font-medium text-cx-ink2 underline-offset-2 hover:underline">{job.sourceLabel}</a>
+      <a href={job.source === 'himalayas' ? HIMALAYAS_HOME : job.applyUrl} target="_blank" rel="noreferrer noopener" className="font-medium text-cx-ink2 underline-offset-2 hover:underline">{job.sourceLabel}</a>
       {' · '}{verb} <Time iso={seenAt} relative />
     </span>
   )
@@ -106,22 +102,16 @@ function DemoFallback({ title, body }: { title: string; body: React.ReactNode })
 
 function Credit({ state }: { state: Extract<LiveState, { status: 'live' }> }) {
   const { data } = state
-  const partners = data.sources.filter(s => s.key !== 'himalayas' && s.ok)
-  const himalayas = data.sources.find(s => s.key === 'himalayas')
+  const companies = data.sources.filter(s => s.key !== 'himalayas' && s.ok)
+  const himalayas = data.sources.find(s => s.key === 'himalayas' && s.ok)
   return (
     <div className="cx-card mb-4 flex gap-3 p-4 text-[12.5px] text-cx-ink2">
       <Info size={16} className="mt-0.5 shrink-0 text-cx-info" aria-hidden />
-      <div className="space-y-1">
-        <p>
-          <span className="font-medium text-cx-ink">Remote roles open to candidates in India, sourced from <a href={HIMALAYAS_HOME} target="_blank" rel="noreferrer noopener" className="text-cx-accent-ink underline underline-offset-2">Himalayas</a></span>
-          {partners.length > 0 && <>, plus openings from partner employers who agreed to be listed ({partners.map(p => p.label.replace(' (partner)', '')).join(', ')})</>}.
-          {' '}Last refreshed <Time iso={data.fetchedAt} relative />. Applications go through the source.
-          {himalayas && !himalayas.ok && <span className="text-cx-warn"> Himalayas did not respond on the last refresh.</span>}
-        </p>
-        <p className="text-cx-dim">
-          Only skills a posting lists under its own requirement headings are scored, at assumed levels ({ASSUMED_LEVELS.required} required, {ASSUMED_LEVELS.preferred} preferred). Skills only mentioned elsewhere are shown as “extracted” and not scored. Postings with too few stated skills show “Limited source detail” instead of a score. Each listing is checked again before you open or apply to it. SYRKA is not affiliated with these employers.
-        </p>
-      </div>
+      <p>
+        <span className="font-medium text-cx-ink">Real openings in India from the careers pages of {companies.length} companies</span>
+        {himalayas && <>, plus remote roles from <a href={HIMALAYAS_HOME} target="_blank" rel="noreferrer noopener" className="underline underline-offset-2">Himalayas</a></>}.
+        {' '}Apply directly on the company’s site. Last refreshed <Time iso={data.fetchedAt} relative />. Skills are read from each posting by keyword, so treat the match as a guide.
+      </p>
     </div>
   )
 }
@@ -130,14 +120,14 @@ export default function LiveOpeningsView({ state: live }: { state: LiveState }) 
   const state = useDemoState()
   const [query, setQuery] = useState('')
   const [family, setFamily] = useState<'all' | RoleFamily>('all')
-  const [type, setType] = useState('all')
-  const [detail, setDetail] = useState<'all' | 'scored'>('all')
+  const [company, setCompany] = useState('all')
+  const [experience, setExperience] = useState<'any' | 'junior'>('any')
   const [show, setShow] = useState<'active' | 'saved' | 'dismissed'>('active')
-  const [sort, setSort] = useState<'match' | 'newest'>('match')
+  const [sort, setSort] = useState<'graduate' | 'match' | 'newest'>('graduate')
   const [shown, setShown] = useState(PAGE)
 
   const header = <>
-    <PageHeader eyebrow="Opportunities" title="Live external openings" description="Real roles from external sources, scored against your profile with the same engine as the demo roles." />
+    <PageHeader eyebrow="Opportunities" title="Real job openings" description="Current roles at real companies, matched against your profile. Apply directly on the company’s own site." />
     <OpportunityTabs />
   </>
 
@@ -152,22 +142,22 @@ export default function LiveOpeningsView({ state: live }: { state: LiveState }) 
 
   const jobs = live.data.jobs
   const families = [...new Set(jobs.map(j => j.family))].sort((a, b) => FAMILY_LABEL[a].localeCompare(FAMILY_LABEL[b]))
-  const types = [...new Set(jobs.map(j => j.employmentType).filter((t): t is string => !!t))].sort()
+  const companies = [...new Set(jobs.map(j => j.company))].sort()
+  const isJunior = (j: LiveJob) => j.employmentType === 'Intern' || j.seniority.includes('Entry-level') || (j.minYears === null ? !isSeniorTitle(j.title) : j.minYears <= 2)
   const q = query.trim().toLowerCase()
   const savedIds = new Set(state.savedOpportunities.map(o => o.jobId))
   const dismissedIds = new Set(state.dismissedOpportunities.map(o => o.jobId))
   const rows = jobs
     .map(job => ({ job, match: liveMatch(state, PRIMARY_STUDENT_ID, job) }))
-    .filter(({ job, match }) =>
+    .filter(({ job }) =>
       (!q || [job.title, job.company, ...[...job.required, ...job.preferred, ...job.extracted].map(id => liveSkillName(state, id))].some(v => v.toLowerCase().includes(q))) &&
       (family === 'all' || job.family === family) &&
-      (type === 'all' || job.employmentType === type) &&
-      (detail === 'all' || match.status === 'ok') &&
+      (company === 'all' || job.company === company) &&
+      (experience === 'any' || isJunior(job)) &&
       (show === 'saved' ? savedIds.has(job.id) : show === 'dismissed' ? dismissedIds.has(job.id) : !dismissedIds.has(job.id)))
     .sort((a, b) => sort === 'newest'
       ? (b.job.postedAt ?? '').localeCompare(a.job.postedAt ?? '')
-      : Number(b.match.status === 'ok') - Number(a.match.status === 'ok') || b.match.score - a.match.score)
-  const limited = rows.filter(r => r.match.status !== 'ok').length
+      : (sort === 'graduate' ? Number(isJunior(b.job)) - Number(isJunior(a.job)) : 0) || Number(b.match.status === 'ok') - Number(a.match.status === 'ok') || b.match.score - a.match.score)
 
   return (
     <>
@@ -180,17 +170,17 @@ export default function LiveOpeningsView({ state: live }: { state: LiveState }) 
           <input className="cx-input !pl-8" placeholder="Search title, company or skill" value={query} onChange={e => { setQuery(e.target.value); setShown(PAGE) }} aria-label="Search live openings" />
         </div>
         <select className="cx-select sm:!w-auto" value={family} onChange={e => { setFamily(e.target.value as typeof family); setShown(PAGE) }} aria-label="Role type"><option value="all">All role types</option>{families.map(f => <option key={f} value={f}>{FAMILY_LABEL[f]}</option>)}</select>
-        <select className="cx-select sm:!w-auto" value={type} onChange={e => { setType(e.target.value); setShown(PAGE) }} aria-label="Employment type"><option value="all">Any employment type</option>{types.map(t => <option key={t}>{t}</option>)}</select>
-        <select className="cx-select sm:!w-auto" value={detail} onChange={e => { setDetail(e.target.value as typeof detail); setShown(PAGE) }} aria-label="Source detail"><option value="all">Include limited detail</option><option value="scored">Scored listings only</option></select>
+        <select className="cx-select sm:!w-auto" value={company} onChange={e => { setCompany(e.target.value); setShown(PAGE) }} aria-label="Company"><option value="all">All companies</option>{companies.map(c => <option key={c}>{c}</option>)}</select>
+        <select className="cx-select sm:!w-auto" value={experience} onChange={e => { setExperience(e.target.value as typeof experience); setShown(PAGE) }} aria-label="Experience"><option value="any">Any experience</option><option value="junior">Graduate-friendly (0–2 years)</option></select>
         <select className="cx-select sm:!w-auto" value={show} onChange={e => { setShow(e.target.value as typeof show); setShown(PAGE) }} aria-label="Show">
           <option value="active">Active openings</option>
           <option value="saved">Saved ({jobs.filter(j => savedIds.has(j.id)).length})</option>
           <option value="dismissed">Not interested ({jobs.filter(j => dismissedIds.has(j.id)).length})</option>
         </select>
-        <select className="cx-select sm:!w-auto" value={sort} onChange={e => setSort(e.target.value as typeof sort)} aria-label="Sort"><option value="match">Best aligned</option><option value="newest">Most recent</option></select>
+        <select className="cx-select sm:!w-auto" value={sort} onChange={e => setSort(e.target.value as typeof sort)} aria-label="Sort"><option value="graduate">Graduate-friendly first</option><option value="match">Best skill match</option><option value="newest">Most recent</option></select>
       </div>
 
-      <p className="mb-3 text-[12.5px] text-cx-dim">{rows.length} of {jobs.length} openings{limited ? ` · ${limited} with limited source detail` : ''}</p>
+      <p className="mb-3 text-[12.5px] text-cx-dim">{rows.length} of {jobs.length} openings · {jobs.filter(isJunior).length} graduate-friendly</p>
       {rows.length ? (
         <>
           <ul className="grid gap-3 md:grid-cols-2">
@@ -205,16 +195,16 @@ export default function LiveOpeningsView({ state: live }: { state: LiveState }) 
                       <span className="inline-flex items-center gap-1"><Briefcase size={12} aria-hidden />{FAMILY_LABEL[job.family]}{job.employmentType ? ` · ${job.employmentType}` : ''}</span>
                     </div>
                   </div>
-                  {match.status === 'ok' ? <ScoreBadge score={match.score} /> : <span className="shrink-0"><Tag>Limited source detail</Tag></span>}
+                  {match.status === 'ok' && <ScoreBadge score={match.score} />}
                 </div>
-                <div className="mt-3"><SkillChips job={job} match={match} /></div>
+                <div className="mt-3"><SkillChips match={match} /></div>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[12.5px] text-cx-ink2">
                   <ExperienceTag job={job} />
-                  {match.status === 'ok' && <><span>{match.summary.requiredMet}/{match.summary.requiredTotal} stated required met</span><ConfidenceTag match={match} /></>}
+                  <span>You match {match.summary.requiredMet + match.summary.preferredMet} of {match.summary.requiredTotal + match.summary.preferredTotal} skills</span>
                 </div>
-                <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
-                  <Link href={`/demo/student/opportunities/live/${job.id}`} className="cx-btn cx-btn-primary cx-btn-sm">See match</Link>
+                <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-4">
                   <LiveJobActions job={job} />
+                  <Link href={`/demo/student/opportunities/live/${job.id}`} className="cx-btn cx-btn-ghost cx-btn-sm">See match</Link>
                   <span className="ml-auto"><SourceLine job={job} seenAt={live.data.fetchedAt} /></span>
                 </div>
               </li>
@@ -223,7 +213,7 @@ export default function LiveOpeningsView({ state: live }: { state: LiveState }) 
           {shown < rows.length && <div className="mt-4 text-center"><button className="cx-btn" onClick={() => setShown(s => s + PAGE)}>Show more ({rows.length - shown} left)</button></div>}
         </>
       ) : (
-        <div className="cx-card"><EmptyState icon={<Briefcase size={22} />} title="No openings match these filters" action={<button className="cx-btn" onClick={() => { setQuery(''); setFamily('all'); setType('all'); setDetail('all'); setShow('active') }}>Clear filters</button>} /></div>
+        <div className="cx-card"><EmptyState icon={<Briefcase size={22} />} title="No openings match these filters" action={<button className="cx-btn" onClick={() => { setQuery(''); setFamily('all'); setCompany('all'); setExperience('any'); setShow('active') }}>Clear filters</button>} /></div>
       )}
     </>
   )

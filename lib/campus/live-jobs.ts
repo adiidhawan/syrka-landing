@@ -1,25 +1,21 @@
 /**
- * Live external openings for the student portal.
+ * Live external openings for the student portal: real, current roles in India read from the public job-board feeds
+ * that companies publish through their applicant-tracking systems (Greenhouse, Lever, Ashby) — the same feeds that
+ * power each company's own careers page. Students apply directly on the company's site.
  *
- * Sources, and the terms each is used under:
- * - Himalayas (https://himalayas.app/docs/remote-jobs-api): remote roles open to candidates in India. Its terms
- *   allow display in our own app, commercial use included, provided every listing shows a visible Himalayas credit
- *   with a link, every Apply action uses the API's `applicationLink`, closed jobs (HTTP 410) are removed, and jobs
- *   are never passed on to other boards, aggregators, Google Jobs or LinkedIn (so no JobPosting structured data).
- * - Partner employer boards (Greenhouse, Lever, Ashby): read only for employers listed in CAMPUS_PARTNER_BOARDS,
- *   which must only name employers that have agreed in writing. Their public endpoints exist for the employer's own
- *   careers site, so technical access is not treated as permission. Off by default.
+ * Himalayas (remote roles open to India) can be added with CAMPUS_HIMALAYAS=on; its terms require a visible credit,
+ * Apply via its `applicationLink`, and removing closed jobs (HTTP 410).
  *
- * Skills are mapped to the SYRKA catalogue by deterministic keyword patterns (no AI) and kept apart by provenance:
- * "stated" skills sit under the posting's own requirements or nice-to-have headings; "extracted" skills only appear
- * elsewhere in the prose. Only stated skills are scored. No description text is stored or shown.
+ * Skills are mapped to the SYRKA catalogue by deterministic keyword patterns (no AI). "Stated" skills sit under the
+ * posting's own requirement headings; "extracted" ones are mentioned elsewhere in the text. No description text is
+ * stored or shown; every opening links to the original posting.
  *
  * This file has no framework imports so it can be unit-tested with Node directly.
  */
 
 export type LiveSource = 'himalayas' | 'greenhouse' | 'lever' | 'ashby'
 
-export interface PartnerBoard {
+export interface CompanyBoard {
   source: 'greenhouse' | 'lever' | 'ashby'
   board: string
   company: string
@@ -29,7 +25,7 @@ export interface LiveJob {
   /** Stable id: `hm--{companySlug}--{jobSlug}` for Himalayas, `{source}--{board}--{id}` for partner boards. */
   id: string
   source: LiveSource
-  /** Shown on every card, e.g. "Himalayas" or "Groww careers (partner)". */
+  /** Shown on every card, e.g. "Razorpay careers" or "Himalayas". */
   sourceLabel: string
   sourceHome: string
   company: string
@@ -61,13 +57,37 @@ export interface LiveJobsResult {
 
 export const HIMALAYAS_HOME = 'https://himalayas.app'
 
+/** Companies whose public careers-page feeds are read by default. Override with CAMPUS_COMPANY_BOARDS. */
+export const DEFAULT_COMPANY_BOARDS: CompanyBoard[] = [
+  { source: 'greenhouse', board: 'razorpaysoftwareprivatelimited', company: 'Razorpay' },
+  { source: 'greenhouse', board: 'groww', company: 'Groww' },
+  { source: 'greenhouse', board: 'inmobi', company: 'InMobi' },
+  { source: 'greenhouse', board: 'sigmoid', company: 'Sigmoid' },
+  { source: 'greenhouse', board: 'druva', company: 'Druva' },
+  { source: 'greenhouse', board: 'observeai', company: 'Observe.AI' },
+  { source: 'greenhouse', board: 'stripe', company: 'Stripe' },
+  { source: 'greenhouse', board: 'mongodb', company: 'MongoDB' },
+  { source: 'greenhouse', board: 'databricks', company: 'Databricks' },
+  { source: 'greenhouse', board: 'gitlab', company: 'GitLab' },
+  { source: 'greenhouse', board: 'okta', company: 'Okta' },
+  { source: 'greenhouse', board: 'zscaler', company: 'Zscaler' },
+  { source: 'greenhouse', board: 'toast', company: 'Toast' },
+  { source: 'greenhouse', board: 'twilio', company: 'Twilio' },
+  { source: 'lever', board: 'paytm', company: 'Paytm' },
+  { source: 'lever', board: 'meesho', company: 'Meesho' },
+  { source: 'lever', board: 'zeta', company: 'Zeta' },
+  { source: 'lever', board: 'mindtickle', company: 'Mindtickle' },
+  { source: 'lever', board: 'cred', company: 'CRED' },
+  { source: 'ashby', board: 'sarvam', company: 'Sarvam AI' },
+]
+
 /**
- * Partner boards come only from the CAMPUS_PARTNER_BOARDS environment variable, written as
- * `source:board:Company Name` entries separated by commas, e.g. `greenhouse:groww:Groww,lever:meesho:Meesho`.
- * List an employer only after it has agreed in writing to SYRKA showing its openings.
+ * Parses CAMPUS_COMPANY_BOARDS: `source:board:Company Name` entries separated by commas, e.g.
+ * `greenhouse:groww:Groww,lever:meesho:Meesho`. Unset or empty means the default list.
  */
-export function parsePartnerBoards(value: string | undefined): PartnerBoard[] {
-  return (value ?? '').split(',').map(e => e.trim()).filter(Boolean).flatMap(entry => {
+export function parseCompanyBoards(value: string | undefined): CompanyBoard[] {
+  if (!value?.trim()) return DEFAULT_COMPANY_BOARDS
+  return value.split(',').map(e => e.trim()).filter(Boolean).flatMap(entry => {
     const [source, board, ...name] = entry.split(':')
     if (source !== 'greenhouse' && source !== 'lever' && source !== 'ashby') return []
     if (!board || !/^[a-z0-9-]+$/i.test(board)) return []
@@ -124,7 +144,7 @@ export const LIVE_SKILL_NAMES: Record<string, string> = Object.fromEntries(SKILL
 
 /** Postings rarely state proficiency levels, so stated skills are scored at these assumed demo levels. */
 export const ASSUMED_LEVELS = { required: 70, preferred: 60 } as const
-/** Fewer stated skills than this and a posting is shown with "limited source detail" instead of a score. */
+/** Postings with fewer mapped skills than this are not listed: too little to compare against. */
 export const MIN_STATED_SKILLS = 3
 
 // Headings are matched at the start of a short line, so a bullet such as "Good communication skills" is never
@@ -324,7 +344,7 @@ async function readHimalayas(timeoutMs: number, apiKey: string | undefined, seni
 
 interface RawPosting { id: string; title: string; location: string; url: string; postedAt: string | null; text: string }
 
-async function readBoard(b: PartnerBoard, timeoutMs: number): Promise<RawPosting[]> {
+async function readBoard(b: CompanyBoard, timeoutMs: number): Promise<RawPosting[]> {
   if (b.source === 'greenhouse') {
     const d = await getJson(`https://boards-api.greenhouse.io/v1/boards/${b.board}/jobs?content=true`, timeoutMs) as { jobs?: Json[] }
     return (d.jobs ?? []).map(j => ({
@@ -352,16 +372,16 @@ async function readBoard(b: PartnerBoard, timeoutMs: number): Promise<RawPosting
 
 export const INDIA = /india|bengaluru|bangalore|mumbai|pune|hyderabad|gurgaon|gurugram|delhi|noida|chennai|chandigarh|kolkata|ahmedabad|jaipur/i
 
-/** Normalises a partner posting, or null when it is not an Indian technical, data or design role. */
-export function partnerToLiveJob(b: PartnerBoard, p: RawPosting): LiveJob | null {
+/** Normalises a careers-page posting, or null when it is not an Indian technical, data or design role. */
+export function companyToLiveJob(b: CompanyBoard, p: RawPosting): LiveJob | null {
   if (!INDIA.test(p.location)) return null
   const family = roleFamily(p.title)
   if (!family || !p.url) return null
   const skills = mapSkills(p.text)
-  if (skills.required.length + skills.preferred.length + skills.extracted.length === 0) return null
+  if (skills.required.length + skills.preferred.length + skills.extracted.length < MIN_STATED_SKILLS) return null
   return {
     id: `${b.source}--${b.board}--${p.id}`.replace(/[^a-zA-Z0-9-]/g, ''),
-    source: b.source, sourceLabel: `${b.company} careers (partner)`, sourceHome: p.url,
+    source: b.source, sourceLabel: `${b.company} careers`, sourceHome: p.url,
     company: b.company, title: p.title, location: p.location.replace(/\s+/g, ' ').trim(), openWorldwide: false,
     applyUrl: p.url, postedAt: p.postedAt, expiresAt: null, family, seniority: [], employmentType: null,
     minYears: parseMinYears(p.title, p.text), ...skills,
@@ -369,24 +389,26 @@ export function partnerToLiveJob(b: PartnerBoard, p: RawPosting): LiveJob | null
 }
 
 /**
- * Reads Himalayas and any allow-listed partner boards in parallel. A failing source is reported in `sources`; the
+ * Reads the company boards (and Himalayas when enabled) in parallel. A failing source is reported in `sources`; the
  * call only throws when every source fails, so a cache keeps serving the last good result instead.
  */
 export async function fetchLiveJobs(opts: {
-  partners?: PartnerBoard[]
+  companies?: CompanyBoard[]
+  /** Also read Himalayas. Off unless CAMPUS_HIMALAYAS=on. */
+  himalayas?: boolean
   himalayasKey?: string
   timeoutMs?: number
   /** Himalayas seniority levels to read. The student list uses entry level; calibration also reads mid level. */
   seniority?: string[]
   maxPages?: number
 } = {}): Promise<LiveJobsResult> {
-  const { partners = [], himalayasKey, timeoutMs = 12_000, seniority = ['Entry-level'], maxPages = HIMALAYAS_MAX_PAGES } = opts
+  const { companies = DEFAULT_COMPANY_BOARDS, himalayas = false, himalayasKey, timeoutMs = 12_000, seniority = ['Entry-level'], maxPages = HIMALAYAS_MAX_PAGES } = opts
   const tasks: { key: string; label: string; run: () => Promise<LiveJob[]> }[] = [
-    { key: 'himalayas', label: 'Himalayas', run: () => readHimalayas(timeoutMs, himalayasKey, seniority, maxPages) },
-    ...partners.map(b => ({
-      key: `${b.source}:${b.board}`, label: `${b.company} (partner)`,
-      run: async () => (await readBoard(b, timeoutMs)).map(p => partnerToLiveJob(b, p)).filter((j): j is LiveJob => j !== null),
+    ...companies.map(b => ({
+      key: `${b.source}:${b.board}`, label: b.company,
+      run: async () => (await readBoard(b, timeoutMs)).map(p => companyToLiveJob(b, p)).filter((j): j is LiveJob => j !== null),
     })),
+    ...(himalayas ? [{ key: 'himalayas', label: 'Himalayas', run: () => readHimalayas(timeoutMs, himalayasKey, seniority, maxPages) }] : []),
   ]
   const results = await Promise.allSettled(tasks.map(t => t.run()))
   if (results.every(r => r.status === 'rejected')) throw new Error('No live job source responded')

@@ -16,7 +16,7 @@ export default function OpportunityTabs() {
         Illustrative demo roles
       </Link>
       <Link href="/demo/student/opportunities/live" role="tab" aria-selected={live} className={cn(tab, live ? 'bg-cx-surface text-cx-ink shadow-sm' : 'text-cx-dim hover:text-cx-ink')}>
-        <Radio size={13} className="text-cx-ok" aria-hidden />Live external openings
+        <Radio size={13} className="text-cx-ok" aria-hidden />Real job openings
       </Link>
     </div>
   )

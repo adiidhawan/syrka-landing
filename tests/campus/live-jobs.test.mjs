@@ -2,8 +2,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  himalayasIdFromGuid, himalayasPathFromId, himalayasToLiveJob, htmlToText, mapSkills, parseMinYears, parsePartnerBoards,
-  partnerToLiveJob, roleFamily,
+  himalayasIdFromGuid, himalayasPathFromId, himalayasToLiveJob, htmlToText, mapSkills, parseMinYears, parseCompanyBoards,
+  companyToLiveJob, roleFamily, DEFAULT_COMPANY_BOARDS,
 } from '../../lib/campus/live-jobs.ts'
 import { calculateCandidateMatch } from '../../lib/campus/matching.ts'
 import { createSeedState, deriveRequirements } from '../../lib/campus/seed.ts'
@@ -69,16 +69,18 @@ test('Himalayas jobs that are not openings, not technical or not open to India a
   assert.equal(himalayasToLiveJob({ ...himalayasJob, locationRestrictions: [] }).location, 'Remote · open worldwide')
 })
 
-test('partner boards are off unless explicitly allow-listed, and malformed entries are ignored', () => {
-  assert.deepEqual(parsePartnerBoards(undefined), [])
-  assert.deepEqual(parsePartnerBoards('greenhouse:groww:Groww, lever:meesho, workday:x:Y, ashby:bad slug:Z'), [
+test('company careers pages are read by default, the list can be overridden, and malformed entries are ignored', () => {
+  assert.equal(parseCompanyBoards(undefined), DEFAULT_COMPANY_BOARDS)
+  assert.ok(DEFAULT_COMPANY_BOARDS.some(b => b.company === 'Razorpay'))
+  assert.deepEqual(parseCompanyBoards('greenhouse:groww:Groww, lever:meesho, workday:x:Y, ashby:bad slug:Z'), [
     { source: 'greenhouse', board: 'groww', company: 'Groww' },
     { source: 'lever', board: 'meesho', company: 'meesho' },
   ])
-  const job = partnerToLiveJob({ source: 'greenhouse', board: 'acme', company: 'Acme' },
+  const job = companyToLiveJob({ source: 'greenhouse', board: 'acme', company: 'Acme' },
     { id: '1', title: 'Backend Engineer', location: 'Bengaluru, India', url: 'https://example.com/1', postedAt: null, text: 'Requirements\nPython, SQL and Docker' })
-  assert.equal(job.sourceLabel, 'Acme careers (partner)')
-  assert.equal(partnerToLiveJob({ source: 'greenhouse', board: 'acme', company: 'Acme' }, { id: '2', title: 'Backend Engineer', location: 'Berlin', url: 'https://example.com/2', postedAt: null, text: 'Python' }), null)
+  assert.equal(job.sourceLabel, 'Acme careers')
+  assert.equal(job.applyUrl, 'https://example.com/1', 'apply goes straight to the company posting')
+  assert.equal(companyToLiveJob({ source: 'greenhouse', board: 'acme', company: 'Acme' }, { id: '2', title: 'Backend Engineer', location: 'Berlin', url: 'https://example.com/2', postedAt: null, text: 'Python' }), null)
 })
 
 test('too few stated requirements gives limited source detail, not a score', () => {

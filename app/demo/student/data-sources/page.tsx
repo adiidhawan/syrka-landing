@@ -2,7 +2,7 @@ import { ExternalLink } from 'lucide-react'
 import { Card, PageHeader, Tag, Time } from '@/components/campus/ui'
 import { getLandscape, getMissions } from '@/lib/campus/external.server'
 import { getLiveState } from '@/lib/campus/live-jobs.server'
-import { parsePartnerBoards } from '@/lib/campus/live-jobs'
+import { parseCompanyBoards } from '@/lib/campus/live-jobs'
 import { snapshotStoreKind } from '@/lib/campus/snapshot-store'
 import { DATA_SOURCES, type SourceKey } from '@/lib/campus/sources'
 
@@ -10,11 +10,13 @@ export const revalidate = 3600
 
 export default async function DataSourcesPage() {
   const [live, missions, landscape] = await Promise.all([getLiveState(), getMissions(), getLandscape()])
-  const partners = parsePartnerBoards(process.env.CAMPUS_PARTNER_BOARDS)
+  const companies = parseCompanyBoards(process.env.CAMPUS_COMPANY_BOARDS)
+  const himalayasOn = process.env.CAMPUS_HIMALAYAS === 'on'
+  const okCompanies = live.status === 'live' ? live.data.sources.filter(s => s.key !== 'himalayas' && s.ok).length : 0
   const history = snapshotStoreKind()
   const status: Record<SourceKey, { label: string; tone: 'ok' | 'warn' | 'neutral'; at?: string }> = {
-    himalayas: live.status === 'live' ? { label: 'Live', tone: 'ok', at: live.data.fetchedAt } : { label: live.status === 'disabled' ? 'Switched off' : live.status === 'stale' ? 'Stale, hidden' : 'Unavailable', tone: 'warn' },
-    partner_boards: partners.length ? { label: `${partners.length} partner${partners.length > 1 ? 's' : ''} enabled`, tone: 'ok' } : { label: 'Off (no partners configured)', tone: 'neutral' },
+    company_boards: live.status === 'live' ? { label: `Live · ${okCompanies} of ${companies.length} companies`, tone: 'ok', at: live.data.fetchedAt } : { label: live.status === 'disabled' ? 'Switched off' : live.status === 'stale' ? 'Stale, hidden' : 'Unavailable', tone: 'warn' },
+    himalayas: !himalayasOn ? { label: 'Off', tone: 'neutral' } : live.status === 'live' && live.data.sources.some(s => s.key === 'himalayas' && s.ok) ? { label: 'Live', tone: 'ok', at: live.data.fetchedAt } : { label: 'Unavailable', tone: 'warn' },
     github: missions.status === 'live' ? { label: 'Live', tone: 'ok', at: missions.data.fetchedAt } : { label: missions.rateLimitedUntil ? 'Rate limited' : 'Unavailable', tone: 'warn' },
     openalex: { label: process.env.OPENALEX_API_KEY ? 'On request (API key set)' : 'On request (shared free allowance)', tone: 'neutral' },
     onet: { label: 'Internal mapping, O*NET 31.0', tone: 'neutral' },

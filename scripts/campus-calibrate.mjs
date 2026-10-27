@@ -2,16 +2,16 @@
 //
 //   npm run campus:calibrate
 //
-// Reads the live-openings sources (Himalayas, plus any partner boards in CAMPUS_PARTNER_BOARDS) and writes
+// Reads company careers pages (CAMPUS_COMPANY_BOARDS or the default list) and Himalayas, and writes
 // lib/campus/calibration.ts: the share of postings in each role family that mention each skill. Only these aggregate
 // shares are stored; no posting is saved. Set HIMALAYAS_API_KEY for higher rate limits.
 // Needs Node 23.6+ (or 22.18+) to import the TypeScript module directly.
 import { writeFileSync } from 'node:fs'
-import { fetchLiveJobs, parsePartnerBoards } from '../lib/campus/live-jobs.ts'
+import { fetchLiveJobs, parseCompanyBoards } from '../lib/campus/live-jobs.ts'
 
 // Entry- and mid-level postings ask for much the same skills; reading both gives role families a usable sample.
 const result = await fetchLiveJobs({
-  partners: parsePartnerBoards(process.env.CAMPUS_PARTNER_BOARDS), himalayasKey: process.env.HIMALAYAS_API_KEY,
+  companies: parseCompanyBoards(process.env.CAMPUS_COMPANY_BOARDS), himalayas: true, himalayasKey: process.env.HIMALAYAS_API_KEY,
   seniority: ['Entry-level', 'Mid-level'], maxPages: 10, timeoutMs: 20_000,
 })
 const failed = result.sources.filter(s => !s.ok)

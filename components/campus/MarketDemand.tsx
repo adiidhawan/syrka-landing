@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ArrowDownRight, ArrowUpRight, Info, Landmark, Minus, Plus, Radio } from 'lucide-react'
 import { BarList } from './charts'
 import { Card, EmptyState, Tag, Time } from './ui'
-import { FAMILY_LABEL, HIMALAYAS_HOME, roleFamily } from '@/lib/campus/live-jobs'
+import { FAMILY_LABEL, roleFamily } from '@/lib/campus/live-jobs'
 import type { LandscapeState, MarketDemandState } from '@/lib/campus/external.server'
 import { ONET_ROLE_SKILLS } from '@/lib/campus/onet-role-skills'
 import { liveSkillName, skillsFor } from '@/lib/campus/queries'
@@ -12,14 +12,14 @@ import { PRIMARY_STUDENT_ID } from '@/lib/campus/seed'
 import { useDemoState } from '@/lib/campus/store'
 import type { ActivityEvent } from '@/lib/campus/types'
 
-/** "Based on N live external openings · Last refreshed … · Source: Himalayas" — shown on every demand module. */
+/** "Based on N real openings · Last refreshed … · Source: …" — shown on every demand module. */
 export function DemandSourceLine({ market }: { market: Extract<MarketDemandState, { status: 'live' }> }) {
   return (
     <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[12px] text-cx-dim">
       <Radio size={12} className="text-cx-ok" aria-hidden />
-      <span>Based on {market.demand.totalJobs} live external openings</span>
+      <span>Based on {market.demand.totalJobs} real job openings</span>
       <span>· Last refreshed <Time iso={market.demand.fetchedAt} relative /></span>
-      <span>· Source: <a href={HIMALAYAS_HOME} target="_blank" rel="noreferrer noopener" className="text-cx-ink2 underline underline-offset-2">Himalayas</a></span>
+      <span>· Source: {market.sourceSummary}</span>
     </p>
   )
 }
@@ -58,7 +58,7 @@ export function MarketDemandCard({ market }: { market: MarketDemandState }) {
   return (
     <Card
       title="Live market demand"
-      description="How many current external openings mention each skill on your profile."
+      description="How many current openings at real companies mention each skill on your profile."
       action={<Tag tone="accent">Job-posting demand</Tag>}
     >
       <DemandSourceLine market={market} />
@@ -138,7 +138,7 @@ export function SkillsInDemand({ market }: { market: MarketDemandState }) {
     : []
 
   return (
-    <Card title="Skills in demand now" description="Live external openings that mention the skills on your profile. Your own skill records are unchanged by this.">
+    <Card title="Skills in demand now" description="Current openings that mention the skills on your profile. Your own skill records are unchanged by this.">
       <DemandSourceLine market={market} />
       {inDemand.length ? (
         <ul className="mt-4 space-y-4">

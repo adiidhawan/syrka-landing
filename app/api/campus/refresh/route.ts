@@ -1,7 +1,7 @@
 import { revalidateTag } from 'next/cache'
 import { NextResponse, type NextRequest } from 'next/server'
 import { LANDSCAPE_TAG, MISSIONS_TAG } from '@/lib/campus/external.server'
-import { fetchLiveJobs, parsePartnerBoards } from '@/lib/campus/live-jobs'
+import { fetchLiveJobs, parseCompanyBoards } from '@/lib/campus/live-jobs'
 import { LIVE_JOBS_TAG } from '@/lib/campus/live-jobs.server'
 import { computeDemand, toSnapshot } from '@/lib/campus/market-demand'
 import { writeSnapshot } from '@/lib/campus/snapshot-store'
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
   const report: Record<string, unknown> = { startedAt: new Date().toISOString() }
   try {
-    const live = await fetchLiveJobs({ partners: parsePartnerBoards(process.env.CAMPUS_PARTNER_BOARDS), himalayasKey: process.env.HIMALAYAS_API_KEY || undefined })
+    const live = await fetchLiveJobs({ companies: parseCompanyBoards(process.env.CAMPUS_COMPANY_BOARDS), himalayas: process.env.CAMPUS_HIMALAYAS === 'on', himalayasKey: process.env.HIMALAYAS_API_KEY || undefined })
     const snapshot = toSnapshot(computeDemand(live.jobs, live.fetchedAt))
     report.liveJobs = live.jobs.length
     report.sources = live.sources

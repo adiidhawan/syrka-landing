@@ -24,6 +24,8 @@ export type MarketDemandState =
       priorDate: string | null
       weekly: Record<string, number>
       history: SnapshotStoreKind
+      /** Plain description of where the openings came from, e.g. "careers pages of 19 companies". */
+      sourceSummary: string
     }
   | { status: 'unavailable'; reason: 'disabled' | 'stale' | 'unavailable' }
 
@@ -36,7 +38,10 @@ export async function getMarketDemand(): Promise<MarketDemandState> {
   if (prior) {
     for (const id of new Set([...Object.keys(demand.skills), ...Object.keys(prior.skills)])) weekly[id] = weeklyChange(demand.skills[id], prior, id) ?? 0
   }
-  return { status: 'live', demand, priorDate: prior?.date ?? null, weekly, history: snapshotStoreKind() }
+  const ok = live.data.sources.filter(s => s.ok)
+  const companies = ok.filter(s => s.key !== 'himalayas').length
+  const sourceSummary = [companies ? `careers pages of ${companies} companies` : '', ok.some(s => s.key === 'himalayas') ? 'Himalayas' : ''].filter(Boolean).join(' and ')
+  return { status: 'live', demand, priorDate: prior?.date ?? null, weekly, history: snapshotStoreKind(), sourceSummary }
 }
 
 // ── Open-source missions ─────────────────────────────────────────────────────────────────────────────────────────
